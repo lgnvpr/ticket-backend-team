@@ -1,3 +1,13 @@
+# pull submodule :
+1. chạy lần đầu : git submodule update --init
+2. pull subcode mới : git submodule update --remote
+
+# run : 
+1.cài thư viện :  npm install 
+2.Khởi động docker mongo
+3.Migration dữ liệu : 
+4. chạy : npm run dev
+
 [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
 # ticket

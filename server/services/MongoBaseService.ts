@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable max-len */
 "use strict";
 import { Service as MoleculerService, Context } from "moleculer";
 import { DbService } from "moleculer-db";

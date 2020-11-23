@@ -42,3 +42,4 @@ In the terminal, try the following commands:
 - `npm run dc:down`: Stop the stack with Docker Compose
 # ticket-backend-team
 # ticket-backend-team
+# ticket-backend-team

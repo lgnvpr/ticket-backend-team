@@ -37,8 +37,8 @@ const ApiService: ServiceSchema = {
         aliases: {
           
           // additional treatment resource
-          "REST staff": "staff",
-          "REST position": "PostionStaff",
+          "REST staff": "Staff",
+          "REST position": "PositionStaff",
         },
       },
     ],

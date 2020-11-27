@@ -1,27 +1,28 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import { PostionStaff } from "@Core/base-ticket-team/base-carOwner/PostionStaff";
+import { PositionStaff } from "@Core/base-ticket-team/base-carOwner/PositionStaff";
 import { Staff } from "@Core/base-ticket-team/base-carOwner/Staff";
 import { IList } from "@Core/base-ticket-team/query/IList";
 import MongoBaseService from "@Service/MongoBaseService";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
+import { serviceName } from "server/common/NameService";
 import config from "server/config";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
 @Service({
-	name: "PostionStaff",
+	name: serviceName.position,
 	mixins: [DbService],
 	adapter: new MongoDBAdapter(config.URLDb),
 	settings: {},
-	collection: "PostionStaff",
+	collection: serviceName.position,
 })
-class PositionStaffService extends MongoBaseService<PostionStaff> {
+class PositionStaffService extends MongoBaseService<PositionStaff> {
 	@Action()
 	public create(ctx: Context) {
-		return this._customCreate(ctx, ctx.params as PostionStaff);
+		return this._customCreate(ctx, ctx.params as PositionStaff);
 	}
 	@Action()
 	public list(ctx: Context) {

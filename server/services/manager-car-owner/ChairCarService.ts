@@ -12,15 +12,15 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
 @Service({
-	name: serviceName.staff,
+	name: serviceName.chairCar,
 	mixins: [DbService],
 	adapter: new MongoDBAdapter(config.URLDb),
 	metadata: {
 		populates: [{ field: "position", service: "PostionStaff", filedGet : "positionId" }],
 	},
-	collection: serviceName.staff,
+	collection: serviceName.chairCar,
 })
-class StaffService extends MongoBaseService<Staff> {
+class ChairCarService extends MongoBaseService<Staff> {
 	@Action()
 	public create(ctx: Context) {
 		return this._customCreate(ctx, ctx.params as Staff);
@@ -47,4 +47,4 @@ class StaffService extends MongoBaseService<Staff> {
 	}
 }
 
-module.exports = StaffService;
+module.exports = ChairCarService;

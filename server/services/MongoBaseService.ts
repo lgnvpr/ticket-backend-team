@@ -21,7 +21,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
         if (Array.isArray(params.id)) {
           return value;
         } else {
-          if (value.status === Status.actived.toString()) return value;
+          if (value.status === Status.active.toString()) return value;
           else throw new Error(value.id);
         }
       })
@@ -40,7 +40,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
           createdAt: value.createdAt,
           updatedAt: new Date(),
           updatedBy: ctx.meta?.user?.id as any,
-          status: Status.actived,
+          status: Status.active,
         };
         return this._update(ctx, updatedValue).then((dbUpdatedValue: any) => {
           return dbUpdatedValue;
@@ -55,7 +55,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
           updatedAt: new Date(),
           createdBy: ctx.meta?.user?.id,
           updatedBy: ctx.meta?.user?.id,
-          status: Status.actived,
+          status: Status.active,
         };
         return this._create(ctx, newValue).then((dbNewValue: any) => {
           return dbNewValue;
@@ -92,7 +92,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
       pageSize: pageSize,
       offset: (page - 1) * pageSize,
       limit: pageSize,
-      query: {...combinedQueries, status : Status.actived}, // TODO : status: Status.actived
+      query: {...combinedQueries, status : Status.active}, // TODO : status: Status.active
       sort : sort || ["-createAt"]
     };
     var list :Paging<T> =  await this._list(ctx, newParams);

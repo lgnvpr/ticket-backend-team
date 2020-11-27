@@ -1,0 +1,52 @@
+/* eslint-disable camelcase */
+/* eslint-disable max-len */
+"use strict";
+import { PostionStaff } from "@Core/base-ticket-team/base-carOwner/PostionStaff";
+import { Staff } from "@Core/base-ticket-team/base-carOwner/Staff";
+import { IList } from "@Core/base-ticket-team/query/IList";
+import MongoBaseService from "@Service/MongoBaseService";
+import { Service as MoleculerService, Context } from "moleculer";
+import { Action, Method, Service } from "moleculer-decorators";
+import config from "server/config";
+const MongoDBAdapter = require("moleculer-db-adapter-mongo");
+const DbService = require("moleculer-db");
+
+@Service({
+	name: "PostionStaff",
+	mixins: [DbService],
+	adapter: new MongoDBAdapter(config.URLDb),
+	settings: {},
+	collection: "PostionStaff",
+})
+class PositionStaffService extends MongoBaseService<PostionStaff> {
+	@Action()
+	public create(ctx: Context) {
+		return this._customCreate(ctx, ctx.params as PostionStaff);
+	}
+	@Action()
+	public list(ctx: Context) {
+		return this._customList(ctx, ctx.params as IList);
+	}
+
+	@Action()
+	public remove(ctx: Context) {
+		return this._customRemove(ctx, ctx.params as any);
+	}
+
+	@Action()
+	public count(ctx: Context) {
+		return this._count(ctx, ctx.params);
+	}
+
+	@Action()
+	public async get(ctx: Context<any, any>) {
+    return this._customGet(ctx, ctx.params);
+	}
+
+	@Action()
+	public find(ctx: Context<any, any>) {
+		return this._customFind(ctx, ctx.params);
+	}
+}
+
+module.exports = PositionStaffService;

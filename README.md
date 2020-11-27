@@ -1,7 +1,7 @@
 # pull submodule :
 1. chạy lần đầu : git submodule update --init
 2. pull subcode mới : git submodule update --remote
-
+3. kill port  : sudo kill -9 $(sudo lsof -t -i:3030)
 # run : 
 1.cài thư viện :  npm install 
 2.Khởi động docker mongo

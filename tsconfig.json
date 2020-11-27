@@ -13,9 +13,10 @@
       "baseUrl": "./",
       "allowJs": true,
       "paths": {
-        "@Core/*": ["base-ale/*"],
+        "@Core/*": ["server/ticket-base/*"],
         "@Service/*": ["server/services/*"],
-        "@Applications/*": ["server/application/*"]
+        "@Applications/*": ["server/application/*"],
+        "@Config/*" : ["server/config/*"]
       }
     },
     "exclude": ["node_modules"]

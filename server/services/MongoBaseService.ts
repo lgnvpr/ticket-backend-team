@@ -1,7 +1,11 @@
 "use strict";
+import { IList } from "@Core/base-ticket-team/query/IList";
 import { Service as MoleculerService, Context } from "moleculer";
 import { DbService } from "moleculer-db";
 import { Action, Service } from "moleculer-decorators";
+import { QueryHelper } from "server/helper/QueryHelper";
+import { BaseModel, Status } from "server/ticket-base/base-ticket-team/query/BaseModel";
+import { Paging } from "server/ticket-base/base-ticket-team/query/Paging";
 import { uuid } from 'uuidv4';
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 
@@ -9,25 +13,16 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 
 
 
-class MongoBaseService extends MoleculerService {
-  
-
+class MongoBaseService<T extends BaseModel> extends MoleculerService {
   _customGet(ctx: Context, params: any) {
     params = this.sanitizeParams(ctx, ctx.params);
-    if (ctx.service.settings.populates) {
-      const populateFields = Object.keys(ctx.service.settings.populates);
-      params = {
-        ...params,
-        populate: populateFields,
-      };
-    }
     return this._get(ctx, params)
       .then((value: any) => {
         if (Array.isArray(params.id)) {
           return value;
         } else {
-          // if (value.status === Status.actived.toString()) return value;
-          // else throw new EntityNotFoundError(value.id);
+          if (value.status === Status.actived.toString()) return value;
+          else throw new Error(value.id);
         }
       })
       .catch((error: any) => {
@@ -36,7 +31,7 @@ class MongoBaseService extends MoleculerService {
       });
   }
 
-  _customCreate(ctx: Context, params: any) {
+  _customCreate(ctx: Context<any , any>, params: T): Promise<T> {
     return this._get(ctx, { id: params._id })
       .then((value: any) => {
         const updatedValue = {
@@ -44,8 +39,8 @@ class MongoBaseService extends MoleculerService {
           ...params,
           createdAt: value.createdAt,
           updatedAt: new Date(),
-          // updatedBy: ctx.meta?.user?.id,
-          status: "actived",
+          updatedBy: ctx.meta?.user?.id as any,
+          status: Status.actived,
         };
         return this._update(ctx, updatedValue).then((dbUpdatedValue: any) => {
           return dbUpdatedValue;
@@ -58,9 +53,9 @@ class MongoBaseService extends MoleculerService {
           _id: uuid(),
           createdAt: new Date(),
           updatedAt: new Date(),
-          // createdBy: ctx.meta?.user?.id,
-          // updatedBy: ctx.meta?.user?.id,
-          status: "actived",
+          createdBy: ctx.meta?.user?.id,
+          updatedBy: ctx.meta?.user?.id,
+          status: Status.actived,
         };
         return this._create(ctx, newValue).then((dbNewValue: any) => {
           return dbNewValue;
@@ -68,42 +63,67 @@ class MongoBaseService extends MoleculerService {
       });
   }
 
-  public async _customList(ctx: Context, params: any){
-
-    if (ctx.service.settings.populates) {
-      const populateFields = Object.keys(ctx.service.settings.populates);
-      params = {
-        ...params,
-        populate: populateFields,
-      };
-    }
+  public async _customList(ctx: Context, params: IList) : Promise<Paging<T>>{
+    let newParams: any = params;
+    // if (ctx.service.settings.populates) {
+    //   const populateFields = Object.keys(ctx.service.settings.populates);
+    //   params = {
+    //     ...params,
+    //     populate: populateFields,
+    //   };
+    // }
 
     const page = params.page ? Number(params.page) : 1;
-    const pageSize = params.pageSize ? Number(params.pageSize) : 20;
+    const pageSize = params.pageSize ? Number(params.pageSize) : 10;
+    let sort = params.sort
+    if(!sort ||sort.length ==0 ) { sort=["createAt"] }
+    
+    const combinedQueries = QueryHelper.combineSearchesToQuery(
+      {search : params.search,
+      searchFields : params.searchFields},
+      params.query
+    );
 
-    // conver seachs => query & combine with current query
-    // const combinedQueries = QueryHelper.combineSeachsToQuery(
-    //   params.searchs,
-    //   params.query
-    // );
-    //  return combinedQueries;
-    params = {
+    delete params.searchFields;
+    delete params.search;
+    newParams = {
       ...params,
       page: page,
       pageSize: pageSize,
       offset: (page - 1) * pageSize,
       limit: pageSize,
-      query: { },
+      query: {...combinedQueries, status : Status.actived}, // TODO : status: Status.actived
+      sort : sort || ["-createAt"]
     };
-    return this._list(ctx, params);
+    var list :Paging<T> =  await this._list(ctx, newParams);
+    console.log("---------------------")
+    if (this.metadata.populates) {
+      let getPopulates = this.metadata.populates;
+      getPopulates.map(async(populate)=>{
+        var ids = list.rows.map((item)=>{
+          return item[populate.filedGet];
+        })
+        
+        let getField : Array<any> =await ctx.broker.call(`${populate.service}.get`, {id : ids});
+        list.rows = list.rows.map((item)=>{
+          item.metaMapping = {}
+          item.metaMapping[populate.field] = getField.find((itemField)=>{
+            return item[populate.filedGet] == itemField._id
+          }) 
+          return item;
+        })
+      })  
+    }
+    return list;
+
   }
 
-  public _customRemove(ctx: Context, params: any) {
+  public _customRemove(ctx: Context, params: {id : string}): Promise<T> {
     return this._get(ctx, params)
       .then((result: any) => {
         result = {
           ...result,
-          // status: Status.deleted,
+          status: Status.deleted,
         };
         return this._update(ctx, result)
           .then((updateRespond: any) => {
@@ -116,6 +136,10 @@ class MongoBaseService extends MoleculerService {
       .catch((error: any) => {
         throw new Error(`Object with ID ${params.id} is not exist`);
       });
+  }
+
+  public async _customFind(ctx, params: any):Promise<T[]>{
+    return this._find(ctx, params);
   }
 
 

@@ -13,7 +13,7 @@
       "baseUrl": "./",
       "allowJs": true,
       "paths": {
-        "@Core/*": ["server/ticket-base/*"],
+        "@Core/*": ["server/base-ticket-team/*"],
         "@Service/*": ["server/services/*"],
         "@Applications/*": ["server/application/*"],
         "@Config/*" : ["server/config/*"]

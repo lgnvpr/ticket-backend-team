@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import { Staff } from "@Core/base-ticket-team/base-carOwner/Staff";
-import { IList } from "@Core/base-ticket-team/query/IList";
 import MongoBaseService from "@Service/MongoBaseService";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
+import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
+import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "server/common/NameService";
 import config from "server/config";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");

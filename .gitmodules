@@ -1,6 +1,3 @@
-[submodule "server/ticket-base/base-ticket-team"]
-	path = server/ticket-base/base-ticket-team
-	url = https://github.com/lgnvpr/base-ticket-team.git
 [submodule "server/base-ticket-team"]
 	path = server/base-ticket-team
 	url = https://github.com/lgnvpr/base-ticket-team.git

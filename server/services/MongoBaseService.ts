@@ -1,11 +1,11 @@
 "use strict";
-import { IList } from "@Core/base-ticket-team/query/IList";
 import { Service as MoleculerService, Context } from "moleculer";
 import { DbService } from "moleculer-db";
 import { Action, Service } from "moleculer-decorators";
+import { BaseModel, Status } from "server/base-ticket-team/query/BaseModel";
+import { IList } from "server/base-ticket-team/query/IList";
+import { Paging } from "server/base-ticket-team/query/Paging";
 import { QueryHelper } from "server/helper/QueryHelper";
-import { BaseModel, Status } from "server/ticket-base/base-ticket-team/query/BaseModel";
-import { Paging } from "server/ticket-base/base-ticket-team/query/Paging";
 import { uuid } from 'uuidv4';
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 

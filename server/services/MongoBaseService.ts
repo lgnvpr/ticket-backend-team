@@ -76,6 +76,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
     const page = params.page ? Number(params.page) : 1;
     const pageSize = params.pageSize ? Number(params.pageSize) : 10;
     let sort = params.sort
+    console.log(sort);
     if(!sort ||sort.length ==0 ) { sort=["createAt"] }
     
     const combinedQueries = QueryHelper.combineSearchesToQuery(
@@ -93,11 +94,10 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
       offset: (page - 1) * pageSize,
       limit: pageSize,
       query: {...combinedQueries, status : Status.active}, // TODO : status: Status.active
-      sort : sort || ["-createAt"]
+      sort : sort
     };
     var list :Paging<T> =  await this._list(ctx, newParams);
-    console.log("---------------------")
-    console.log(ctx.service.settings.populates)
+    
     if (ctx.service.settings.populates) {
       let getPopulates = ctx.service.settings.populates;
       getPopulates.map(async(populate)=>{

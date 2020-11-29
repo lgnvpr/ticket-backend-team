@@ -6,7 +6,7 @@ import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import { PositionStaff } from "server/base-ticket-team/base-carOwner/PositionStaff";
 import { IList } from "server/base-ticket-team/query/IList";
-import { serviceName } from "server/common/NameService";
+import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");

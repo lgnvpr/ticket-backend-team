@@ -1,5 +1,6 @@
 import ApiGateway = require("moleculer-web");
 import { ServiceSchema } from "moleculer";
+import { serviceName } from "@Core/query/NameService";
 
 const ApiService: ServiceSchema = {
   name: "ApiGateway",
@@ -37,14 +38,14 @@ const ApiService: ServiceSchema = {
         aliases: {
           
           // additional treatment resource
-          "REST staff": "staff",
-          "REST position_staff": "position_staff",
-          "REST car": "car",
-          "REST chair_car": "chair_car",
-          "REST customer": "customer",
-          "REST route": "route",
-          "REST ticket": "ticket",
-          "REST trip": "trip",
+          "REST staff": serviceName.staff,
+          "REST position_staff": serviceName.position,
+          "REST car": serviceName.car,
+          "REST chair_car": serviceName.chairCar,
+          "REST customer": serviceName.customer,
+          "REST route": serviceName.route,
+          "REST ticket": serviceName.ticket,
+          "REST trip": serviceName.trip,
 
           "GET staff/find": "staff.find",
           "GET position_staff/find": "position_staff.find",

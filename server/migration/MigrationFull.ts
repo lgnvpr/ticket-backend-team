@@ -4,7 +4,7 @@ import { Customer } from "server/base-ticket-team/base-carOwner/Customer";
 import { PositionStaff } from "server/base-ticket-team/base-carOwner/PositionStaff";
 import { Route } from "server/base-ticket-team/base-carOwner/Route";
 import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
-import { serviceName } from "server/common/NameService";
+import { serviceName } from "@Core/query/NameService";
 import { MongoService } from "./ConnectDbMigration";
 import * as data from "./DataExample"
 import { ChairCar } from "@Core/base-carOwner/ChairCar";

@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
+import { ChairCar } from "@Core/base-carOwner/ChairCar";
+import { IFind } from "@Core/query/IFind";
 import MongoBaseService from "@Service/MongoBaseService";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
@@ -15,24 +17,24 @@ const DbService = require("moleculer-db");
 	name: serviceName.chairCar,
 	mixins: [DbService],
 	adapter: new MongoDBAdapter(config.URLDb),
-	metadata: {
-		populates: [{ field: "position", service: "PostionStaff", filedGet : "positionId" }],
+	settings: {
+		populates: [{ field: "car", service: serviceName.car, filedGet : "carId" }],
 	},
 	collection: serviceName.chairCar,
 })
-class ChairCarService extends MongoBaseService<Staff> {
+class ChairCarService extends MongoBaseService<ChairCar> {
 	@Action()
-	public create(ctx: Context) {
-		return this._customCreate(ctx, ctx.params as Staff);
+	public create(ctx: Context<ChairCar>) {
+		return this._customCreate(ctx, ctx.params);
 	}
 	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
+	public list(ctx: Context<IList>) {
+		return this._customList(ctx, ctx.params);
 	}
 
 	@Action()
-	public remove(ctx: Context) {
-		return this._customRemove(ctx, ctx.params as any);
+	public remove(ctx: Context<{id: string}>) {
+		return this._customRemove(ctx, ctx.params);
 	}
 
 	@Action()
@@ -41,9 +43,14 @@ class ChairCarService extends MongoBaseService<Staff> {
 	}
 
 	@Action()
-	public get(ctx: Context<any, any>) {
+	public get(ctx: Context<{id : string | string[]}>) {
 		
 		return this._customGet(ctx, ctx.params);
+	}
+
+	@Action()
+	public find(ctx: Context<IFind> ){
+		return this._customFind(ctx, ctx.params)
 	}
 }
 

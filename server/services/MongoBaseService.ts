@@ -14,7 +14,7 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 
 
 class MongoBaseService<T extends BaseModel> extends MoleculerService {
-  _customGet(ctx: Context, params: any) {
+  _customGet(ctx: Context, params: {id : string | string[]}) {
     params = this.sanitizeParams(ctx, ctx.params);
     return this._get(ctx, params)
       .then((value: any) => {
@@ -97,8 +97,9 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
     };
     var list :Paging<T> =  await this._list(ctx, newParams);
     console.log("---------------------")
-    if (this.metadata.populates) {
-      let getPopulates = this.metadata.populates;
+    console.log(ctx.service.settings.populates)
+    if (ctx.service.settings.populates) {
+      let getPopulates = ctx.service.settings.populates;
       getPopulates.map(async(populate)=>{
         var ids = list.rows.map((item)=>{
           return item[populate.filedGet];
@@ -145,4 +146,6 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
 
 }
 export = MongoBaseService
+
+ 
 

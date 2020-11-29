@@ -1,11 +1,11 @@
 export const enum serviceName {
-    staff = "Staff",
-    position = "PositionStaff",
-    car = "Car",
-    chairCar = "chairCar",
-    customer = "Customer",
-    route = "Route",
-    ticket = "Ticket",
-    trip = "Trip",
+    staff = "staff",
+    position = "position_staff",
+    car = "car",
+    chairCar = "chair_car",
+    customer = "customer",
+    route = "route",
+    ticket = "ticket",
+    trip = "trip",
     account = "account"
 } 

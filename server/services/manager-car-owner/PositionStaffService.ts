@@ -24,13 +24,13 @@ class PositionStaffService extends MongoBaseService<PositionStaff> {
 		return this._customCreate(ctx, ctx.params as PositionStaff);
 	}
 	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
+	public list(ctx: Context<IList>) {
+		return this._customList(ctx, ctx.params);
 	}
 
 	@Action()
-	public remove(ctx: Context) {
-		return this._customRemove(ctx, ctx.params as any);
+	public remove(ctx: Context<{id: string}>) {
+		return this._customRemove(ctx, ctx.params);
 	}
 
 	@Action()

@@ -37,8 +37,35 @@ const ApiService: ServiceSchema = {
         aliases: {
           
           // additional treatment resource
-          "REST staff": "Staff",
-          "REST position": "PositionStaff",
+          "REST staff": "staff",
+          "REST position_staff": "position_staff",
+          "REST car": "car",
+          "REST chair_car": "chair_car",
+          "REST customer": "customer",
+          "REST route": "route",
+          "REST ticket": "ticket",
+          "REST trip": "trip",
+
+          "GET staff/find": "staff.find",
+          "GET position_staff/find": "position_staff.find",
+          "GET car/find": "car.find",
+          "GET chair_car/find": "chair_car.find",
+          "GET customer/find": "customer.find",
+          "GET route/find": "route.find",
+          "GET ticket/find": "ticket.find",
+          "GET trip/find": "trip.find",
+
+          "GET staff/count": "staff.count",
+          "GET position_staff/count": "position_staff.count",
+          "GET car/count": "car.count",
+          "GET chair_car/count": "chair_car.count",
+          "GET customer/count": "customer.count",
+          "GET route/count": "route.count",
+          "GET ticket/count": "ticket.count",
+          "GET trip/count": "trip.count"
+
+
+          
         },
       },
     ],

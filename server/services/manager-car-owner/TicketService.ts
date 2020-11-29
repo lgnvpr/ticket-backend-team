@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
+import { Ticket } from "@Core/base-carOwner/Ticket";
+import { IFind } from "@Core/query/IFind";
 import MongoBaseService from "@Service/MongoBaseService";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
@@ -15,15 +17,19 @@ const DbService = require("moleculer-db");
 	name: serviceName.ticket,
 	mixins: [DbService],
 	adapter: new MongoDBAdapter(config.URLDb),
-	metadata: {
-		populates: [{ field: "position", service: "PostionStaff", filedGet : "positionId" }],
+	settings: {
+		populates: [{ field: "trip", service: serviceName.car, filedGet: "positionId" },
+		{ field: "chairCar", service: serviceName.car, filedGet: "chairCarId" },
+		{ field: "staff", service: serviceName.car, filedGet: "staffId" },
+		{ field: "customer", service: serviceName.car, filedGet: "customerId" }
+		],
 	},
 	collection: serviceName.ticket,
 })
-class TicketService extends MongoBaseService<Staff> {
+class TicketService extends MongoBaseService<Ticket> {
 	@Action()
-	public create(ctx: Context) {
-		return this._customCreate(ctx, ctx.params as Staff);
+	public create(ctx: Context<Ticket>) {
+		return this._customCreate(ctx, ctx.params);
 	}
 	@Action()
 	public list(ctx: Context) {
@@ -31,8 +37,8 @@ class TicketService extends MongoBaseService<Staff> {
 	}
 
 	@Action()
-	public remove(ctx: Context) {
-		return this._customRemove(ctx, ctx.params as any);
+	public remove(ctx: Context<{ id: string }>) {
+		return this._customRemove(ctx, ctx.params);
 	}
 
 	@Action()
@@ -41,9 +47,14 @@ class TicketService extends MongoBaseService<Staff> {
 	}
 
 	@Action()
-	public get(ctx: Context<any, any>) {
-		
+	public get(ctx: Context<{ id: string | string[] }>) {
+
 		return this._customGet(ctx, ctx.params);
+	}
+
+	@Action()
+	public find(ctx: Context<IFind>) {
+		return this._customFind(ctx, ctx.params)
 	}
 }
 

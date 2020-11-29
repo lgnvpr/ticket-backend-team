@@ -1,4 +1,4 @@
-import { Sex } from "@Core/base-ticket-team/base-carOwner/Customer";
+import { Sex } from "@Core/base-carOwner/Customer";
 
 export const randomSex = (): Sex => {
     return (Math.floor(Math.random() * 3) % 2 == 0)
@@ -6,7 +6,7 @@ export const randomSex = (): Sex => {
         : Sex.female
 }
 
-export const randomPHone = (): string => {
+export const randomPhone = (): string => {
     let phone: number = 100000000 + Math.floor(Math.random() * 1000000000);
     return `09${phone}`
 }
@@ -72,7 +72,7 @@ export let name = ["Nguyễn Thị Hồng Hạnh",
     "Trương Phú Đồng"
 ]
 
-export let postion = [
+export let position = [
     "Giám đốc điều hành", "Nhân viên bán hàng", "Tài xế",  "Nhân viên dọn dẹp", "Thư kí", "Kế toán", "Nhân viên kiểm soát", "Nhân viên soát vé",
     "Nhân viên kiểm tra chất lượng", "Nhân viên dọn dẹp", "Nhân viên rửa xe", "Đội trưởng đội rửa xe"
 ]

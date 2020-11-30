@@ -28,8 +28,15 @@ const DbService = require("moleculer-db");
 })
 class TicketService extends MongoBaseService<Ticket> {
 	@Action()
-	public create(ctx: Context<Ticket>) {
-		return this._customCreate(ctx, ctx.params);
+	public async create(ctx: Context<Ticket>) {
+		let params: any = ctx.params;
+        let ticket: Ticket = params;
+        if (!ticket ||!ticket.metaMapping.customer.name || !ticket.metaMapping.customer.phoneNumber) 
+            throw new Error("Không được để trống thông tin khách hàng");
+        let getCustomer = ticket.metaMapping.customer;
+        if (getCustomer) getCustomer = await ctx.call(`${serviceName.customer}.create`, getCustomer)
+        ticket.customerId = getCustomer._id.toString();
+		return this._customCreate(ctx, ticket);
 	}
 	@Action()
 	public list(ctx: Context) {

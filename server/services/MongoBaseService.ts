@@ -1,4 +1,5 @@
 "use strict";
+import { IFind } from "@Core/query/IFind";
 import { Service as MoleculerService, Context } from "moleculer";
 import { DbService } from "moleculer-db";
 import { Action, Service } from "moleculer-decorators";
@@ -32,6 +33,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
   }
 
   _customCreate(ctx: Context<any , any>, params: T): Promise<T> {
+    delete params.metaMapping
     return this._get(ctx, { id: params._id })
       .then((value: any) => {
         const updatedValue = {
@@ -139,7 +141,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
       });
   }
 
-  public async _customFind(ctx, params: any):Promise<T[]>{
+  public async _customFind(ctx, params: IFind):Promise<T[]>{
     return this._find(ctx, params);
   }
 

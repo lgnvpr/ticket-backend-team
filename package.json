@@ -8,13 +8,8 @@
     "docker-mongo": "docker run -d -p 27017:27017 --name mongo mongo",
     "start": "ts-node -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --config moleculer.config.ts server/services/*.ts server/services/*/*.ts  server/application/*.ts",
     "migration": "ts-node -r tsconfig-paths/register server/migration/MigrationFull.ts",
-<<<<<<< HEAD
-    "migration-local": "NODE_ENV=local;docker start mongo; npm run migration",
-    "dev": "NODE_ENV=local ;docker start mongo; npm run start",
-=======
     "migration-local" : "NODE_ENV=local;docker start mongo; npm run migration",
     "local": "NODE_ENV=local ;docker start mongo; npm run start",
->>>>>>> 2cf1733b3c9f6b98c7e63cf1db53b9e1c8762c16
     "cli": "moleculer connect NATS",
     "ci": "jest --watch",
     "test": "jest --coverage",

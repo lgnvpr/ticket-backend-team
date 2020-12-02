@@ -10,6 +10,7 @@ import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
 import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
+import { Paging } from "@Core/query/Paging";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -22,15 +23,41 @@ const DbService = require("moleculer-db");
 class CarService extends MongoBaseService<Car> {
 	@Action()
 	public create(ctx: Context<Car>) {
-		return this._customCreate(ctx, ctx.params);
+		const car: Car = {
+			_id: ctx.params._id,
+			entryAt: ctx.params.entryAt,
+			licensePlates: ctx.params.licensePlates,
+			name: ctx.params.name,
+			description: ctx.params.description,
+			origin: ctx.params.origin,
+		};
+		return this._customCreate(ctx, car);
 	}
 	@Action()
-	public list(ctx: Context<IList>) {
-		return this._customList(ctx, ctx.params);
+	public async list(ctx: Context<IList>) {
+		var listCar: Paging<Car> = await this._customList(ctx, ctx.params);
+		const carIds = listCar.rows.map((car) => car._id);
+		const countCharOfCar: {
+			_id: string;
+			count: number;
+		}[] = await ctx.call(`${serviceName.chairCar}.countGroupByCarIds`, {
+			id: carIds,
+		});
+
+		listCar.rows.map((car) => {
+			const getTotalChair = countCharOfCar.find(
+				(count) => count._id == car._id
+			);
+			car.metaMapping = {
+				totalChair: getTotalChair?.count,
+			};
+			return car;
+		});
+		return listCar;
 	}
 
 	@Action()
-	public remove(ctx: Context<{id: string}>) {
+	public remove(ctx: Context<{ id: string }>) {
 		return this._customRemove(ctx, ctx.params);
 	}
 
@@ -40,14 +67,13 @@ class CarService extends MongoBaseService<Car> {
 	}
 
 	@Action()
-	public get(ctx: Context<{id : string | string[]}>) {
-		
+	public get(ctx: Context<{ id: string | string[] }>) {
 		return this._customGet(ctx, ctx.params);
 	}
-	
+
 	@Action()
-	public find(ctx: Context<IFind> ){
-		return this._customFind(ctx, ctx.params)
+	public find(ctx: Context<IFind>) {
+		return this._customFind(ctx, ctx.params);
 	}
 }
 

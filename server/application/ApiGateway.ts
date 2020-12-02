@@ -65,6 +65,14 @@ const ApiService: ServiceSchema = {
           "GET ticket/count": `${serviceName.ticket}.count`,
           "GET trip/count": `${serviceName.trip}.count`,
 
+          "GET chair_car/byCar/:carId" : `${serviceName.chairCar}.getByCarId`,
+          "GET chair_car/autoCreateChair" : `${serviceName.chairCar}.autoCreateChair`,
+          "GET chair_car/countGroupByCarIds" : `${serviceName.chairCar}.countGroupByCarIds`,
+          "GET chair_car/getDrivers" : `${serviceName.chairCar}.getDrivers`,
+          
+
+          
+
 
           
         },

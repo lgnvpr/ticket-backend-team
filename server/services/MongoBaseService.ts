@@ -15,21 +15,32 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 
 
 class MongoBaseService<T extends BaseModel> extends MoleculerService {
-  _customGet(ctx: Context, params: {id : string | string[]}) {
+  _customGet(ctx: Context, params: {id : string | string[]}): Promise<T> {
     params = this.sanitizeParams(ctx, ctx.params);
     return this._get(ctx, params)
-      .then((value: any) => {
-        if (Array.isArray(params.id)) {
-          return value;
-        } else {
-          if (value.status === Status.active.toString()) return value;
-          else throw new Error(value.id);
-        }
+      .then((value) => {
+        return value
       })
-      .catch((error: any) => {
-        console.log(error);
-        throw error;
-      });
+      .catch((error) => null);
+  }
+  _customCreateMany(ctx: Context<any ,any>, params: T[]): Promise<T[]> {
+    const newParams: any ={
+      entities : []
+    }
+    newParams.entities = params.map((item)=>{
+      return  {
+        ...item,
+        _id: uuid(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: ctx.meta?.user?.id,
+        updatedBy: ctx.meta?.user?.id,
+        status: Status.active,
+      };
+    }) as any
+
+    return this._insert(ctx, newParams);
+
   }
 
   _customCreate(ctx: Context<any , any>, params: T): Promise<T> {

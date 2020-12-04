@@ -68,7 +68,10 @@ const ApiService: ServiceSchema = {
           "GET chair_car/byCar/:carId" : `${serviceName.chairCar}.getByCarId`,
           "GET chair_car/autoCreateChair" : `${serviceName.chairCar}.autoCreateChair`,
           "GET chair_car/countGroupByCarIds" : `${serviceName.chairCar}.countGroupByCarIds`,
-          "GET chair_car/getDrivers" : `${serviceName.chairCar}.getDrivers`,
+          "GET chair_car/getDrivers" : `${serviceName.position}.getDrivers`,
+
+          "GET trip/getListByDate" : `${serviceName.trip}.getListByDate`,
+          "GET trip/getChairByTrip/:id" : `${serviceName.trip}.getChairByTrip`,
           
 
           

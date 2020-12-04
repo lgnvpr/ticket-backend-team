@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import { Car } from "@Core/base-carOwner/Car";
+import { Car, carValidate } from "@Core/base-carOwner/Car";
 import { IFind } from "@Core/query/IFind";
-import MongoBaseService from "@Service/MongoBaseService";
+import BaseServiceCustom from "@Service/BaseServiceCustom";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
@@ -11,6 +11,8 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { Paging } from "@Core/query/Paging";
+import { IGet } from "@Core/query/IGet";
+import { ValidateHelper } from "server/helper/ValidateHelper";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -20,7 +22,7 @@ const DbService = require("moleculer-db");
 	adapter: new MongoDBAdapter(config.URLDb),
 	collection: serviceName.car,
 })
-class CarService extends MongoBaseService<Car> {
+class CarService extends BaseServiceCustom<Car> {
 	@Action()
 	public create(ctx: Context<Car>) {
 		const car: Car = {
@@ -31,7 +33,9 @@ class CarService extends MongoBaseService<Car> {
 			description: ctx.params.description,
 			origin: ctx.params.origin,
 		};
-		return this._customCreate(ctx, car);
+		var check = ValidateHelper.validateJoi<Car>(carValidate, car);
+		return check;
+		// return this._customCreate(ctx, car);
 	}
 	@Action()
 	public async list(ctx: Context<IList>) {
@@ -67,7 +71,7 @@ class CarService extends MongoBaseService<Car> {
 	}
 
 	@Action()
-	public get(ctx: Context<{ id: string | string[] }>) {
+	public get(ctx: Context<IGet>) {
 		return this._customGet(ctx, ctx.params);
 	}
 

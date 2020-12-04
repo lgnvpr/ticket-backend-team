@@ -1,8 +1,10 @@
 "use strict";
 import { IFind } from "@Core/query/IFind";
+import { IGet } from "@Core/query/IGet";
 import { Service as MoleculerService, Context } from "moleculer";
 import { DbService } from "moleculer-db";
 import { Action, Service } from "moleculer-decorators";
+import { BaseServiceWithMongo } from "server/base-service/mongo/BaseServiceWithMongo";
 import { BaseModel, Status } from "server/base-ticket-team/query/BaseModel";
 import { IList } from "server/base-ticket-team/query/IList";
 import { Paging } from "server/base-ticket-team/query/Paging";
@@ -14,8 +16,8 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 
 
 
-class MongoBaseService<T extends BaseModel> extends MoleculerService {
-  _customGet(ctx: Context, params: {id : string | string[]}): Promise<T> {
+class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
+  _customGet(ctx: Context, params: IGet): Promise<T> {
     params = this.sanitizeParams(ctx, ctx.params);
     return this._get(ctx, params)
       .then((value) => {
@@ -23,7 +25,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
       })
       .catch((error) => null);
   }
-  _customCreateMany(ctx: Context<any ,any>, params: T[]): Promise<T[]> {
+  _customCreateMany(ctx: Context<any ,any>, params: T[]): Promise<T[]|T> {
     const newParams: any ={
       entities : []
     }
@@ -40,7 +42,6 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
     }) as any
 
     return this._insert(ctx, newParams);
-
   }
 
   _customCreate(ctx: Context<any , any>, params: T): Promise<T> {
@@ -113,20 +114,7 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
     
     if (ctx.service.settings.populates) {
       let getPopulates = ctx.service.settings.populates;
-      getPopulates.map(async(populate)=>{
-        var ids = list.rows.map((item)=>{
-          return item[populate.filedGet];
-        })
-        
-        let getField : Array<any> =await ctx.broker.call(`${populate.service}.get`, {id : ids});
-        list.rows = list.rows.map((item)=>{
-          item.metaMapping = {}
-          item.metaMapping[populate.field] = getField.find((itemField)=>{
-            return item[populate.filedGet] == itemField._id
-          }) 
-          return item;
-        })
-      })  
+      list.rows = await this.mapping(ctx, getPopulates, list.rows);
     }
     return list;
 
@@ -153,12 +141,35 @@ class MongoBaseService<T extends BaseModel> extends MoleculerService {
   }
 
   public async _customFind(ctx, params: IFind):Promise<T[]>{
-    return this._find(ctx, params);
+    var list = await this._find(ctx, params);
+    if (ctx.service.settings.populates) {
+      let getPopulates = ctx.service.settings.populates;
+      list = await this.mapping(ctx, getPopulates, list);
+    }
+    return list;
+  }
+
+  private async mapping(ctx: Context,getPopulates:any , list: T[]): Promise<T[]>{
+     getPopulates.map(async(populate)=>{
+      var ids = list.map((item)=>{
+        return item[populate.filedGet];
+      })
+      
+      let getField : Array<any> =await ctx.broker.call(`${populate.service}.get`, {id : ids});
+      list = list.map((item)=>{
+        if(!item.metaMapping) item.metaMapping = {}
+        item.metaMapping[populate.field] = getField.find((itemField)=>{
+          return item[populate.filedGet] == itemField._id
+        }) 
+        return item;
+      })
+    })
+    return list;
   }
 
 
 }
-export = MongoBaseService
+export = BaseServiceCustom
 
  
 

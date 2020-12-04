@@ -3,13 +3,14 @@
 "use strict";
 import { Route } from "@Core/base-carOwner/Route";
 import { IFind } from "@Core/query/IFind";
-import MongoBaseService from "@Service/MongoBaseService";
+import BaseServiceCustom from "@Service/BaseServiceCustom";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
 import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
+import { IGet } from "@Core/query/IGet";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -19,7 +20,7 @@ const DbService = require("moleculer-db");
 	adapter: new MongoDBAdapter(config.URLDb),
 	collection: serviceName.route,
 })
-class RouteService extends MongoBaseService<Route> {
+class RouteService extends BaseServiceCustom<Route> {
 	@Action()
 	public create(ctx: Context<Route>) {
 		return this._customCreate(ctx, ctx.params);
@@ -40,7 +41,7 @@ class RouteService extends MongoBaseService<Route> {
 	}
 
 	@Action()
-	public get(ctx: Context<{id : string | string[]}>) {
+	public get(ctx: Context<IGet>) {
 		return this._customGet(ctx, ctx.params);
 	}
 

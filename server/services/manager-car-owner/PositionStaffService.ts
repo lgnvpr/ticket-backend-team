@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import MongoBaseService from "@Service/MongoBaseService";
+import BaseServiceCustom from "@Service/BaseServiceCustom";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import {
@@ -21,7 +21,7 @@ const DbService = require("moleculer-db");
 	settings: {},
 	collection: serviceName.position,
 })
-class PositionStaffService extends MongoBaseService<PositionStaff> {
+class PositionStaffService extends BaseServiceCustom<PositionStaff> {
 	@Action()
 	public async create(ctx: Context<PositionStaff>) {
 		if (ctx.params._id) {

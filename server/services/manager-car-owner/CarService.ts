@@ -33,8 +33,9 @@ class CarService extends BaseServiceCustom<Car> {
 			description: ctx.params.description,
 			origin: ctx.params.origin,
 		};
-		var check = ValidateHelper.validateJoi<Car>(carValidate, car);
-		return check;
+		return car;
+		// var check = ValidateHelper.validateJoi<Car>(carValidate, car);
+		// return check;
 		// return this._customCreate(ctx, car);
 	}
 	@Action()

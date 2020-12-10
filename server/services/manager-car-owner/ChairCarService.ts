@@ -10,6 +10,7 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
+import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -163,7 +164,10 @@ class ChairCarService extends BaseServiceCustom<ChairCar> {
 			});
 			return createRow;
 		});
-		return testData;
+		var diagramChair: ListChairCar = {
+			dataListChar: testData
+		}
+		return diagramChair;
 	}
 
 	private codeChair(fl: number, column: number, rw: number): string {

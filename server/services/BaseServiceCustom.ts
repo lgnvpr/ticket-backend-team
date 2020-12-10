@@ -79,14 +79,6 @@ class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
 
   public async _customList(ctx: Context, params: IList) : Promise<Paging<T>>{
     let newParams: any = params;
-    // if (ctx.service.settings.populates) {
-    //   const populateFields = Object.keys(ctx.service.settings.populates);
-    //   params = {
-    //     ...params,
-    //     populate: populateFields,
-    //   };
-    // }
-
     const page = params.page ? Number(params.page) : 1;
     const pageSize = params.pageSize ? Number(params.pageSize) : 10;
     let sort = params.sort

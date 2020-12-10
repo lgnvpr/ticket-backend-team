@@ -28,9 +28,9 @@ class PositionStaffService extends BaseServiceCustom<PositionStaff> {
 			const checkDefault = await this._customGet(ctx, {
 				id: ctx.params._id,
 			});
-			if (checkDefault.keyDefault) {
-				throw new Error("Không thể sửa nhân viên mặc định");
-			}
+			// if (checkDefault?.keyDefault) {
+			// 	throw new Error("Không thể sửa nhân viên mặc định");
+			// }
 		}
 
 		return this._customCreate(ctx, ctx.params as PositionStaff);

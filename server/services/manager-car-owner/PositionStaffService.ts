@@ -5,12 +5,12 @@ import BaseServiceCustom from "@Service/BaseServiceCustom";
 import { Service as MoleculerService, Context } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import {
-	PositionDefault,
 	PositionStaff,
 } from "server/base-ticket-team/base-carOwner/PositionStaff";
 import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
+import { PositionDefault } from "@Core/base-carOwner/PositionDefault";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 

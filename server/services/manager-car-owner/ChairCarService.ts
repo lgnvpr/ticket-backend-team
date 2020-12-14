@@ -156,7 +156,7 @@ class ChairCarService extends BaseServiceCustom<ChairCar> {
 							localFloor: getFloor + 1,
 							localColumn: i,
 							localRow: row,
-							CarId: carId,
+							carId: carId,
 						}
 					);
 				}

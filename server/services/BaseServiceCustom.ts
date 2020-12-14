@@ -19,6 +19,8 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
   _customGet(ctx: Context, params: IGet): Promise<T> {
     params = this.sanitizeParams(ctx, ctx.params);
+    // return this._find(ctx, {}) as any;
+
     return this._get(ctx, params)
       .then((value) => {
         return value
@@ -84,13 +86,14 @@ class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
     let sort = params.sort
     console.log(sort);
     if(!sort ||sort.length ==0 ) { sort=["createAt"] }
+    params = this.sanitizeParams(ctx, params);
     
     const combinedQueries = QueryHelper.combineSearchesToQuery(
       {search : params.search,
       searchFields : params.searchFields},
       params.query
     );
-
+    console.log(combinedQueries)
     delete params.searchFields;
     delete params.search;
     newParams = {
@@ -104,6 +107,14 @@ class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
     };
     var list :Paging<T> =  await this._list(ctx, newParams);
     
+    if (ctx.service.settings.populates) {
+      let getPopulates = ctx.service.settings.populates;
+      list.rows = await this.mapping(ctx, getPopulates, list.rows);
+    }
+    if (ctx.service.settings.populates) {
+      let getPopulates = ctx.service.settings.populates;
+      list.rows = await this.mapping(ctx, getPopulates, list.rows);
+    }
     if (ctx.service.settings.populates) {
       let getPopulates = ctx.service.settings.populates;
       list.rows = await this.mapping(ctx, getPopulates, list.rows);
@@ -133,11 +144,12 @@ class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
   }
 
   public async _customFind(ctx, params: IFind):Promise<T[]>{
+    // params = this.sanitizeParams(ctx, params);
     var list = await this._find(ctx, params);
-    if (ctx.service.settings.populates) {
-      let getPopulates = ctx.service.settings.populates;
-      list = await this.mapping(ctx, getPopulates, list);
-    }
+    // if (ctx.service.settings.populates) {
+    //   let getPopulates = ctx.service.settings.populates;
+    //   list = await this.mapping(ctx, getPopulates, list);
+    // }
     return list;
   }
 
@@ -147,7 +159,7 @@ class BaseServiceCustom<T extends BaseModel> extends BaseServiceWithMongo<T> {
         return item[populate.filedGet];
       })
       
-      let getField : Array<any> =await ctx.broker.call(`${populate.service}.get`, {id : ids});
+      let getField : Array<any> =await ctx.broker.call(`${populate.service}.get`,{id : ids} );
       list = list.map((item)=>{
         if(!item.metaMapping) item.metaMapping = {}
         item.metaMapping[populate.field] = getField.find((itemField)=>{

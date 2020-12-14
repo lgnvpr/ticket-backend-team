@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import { Car, carValidate } from "@Core/base-carOwner/Car";
+import { Car } from "@Core/base-carOwner/Car";
 import { IFind } from "@Core/query/IFind";
 import BaseServiceCustom from "@Service/BaseServiceCustom";
 import { Service as MoleculerService, Context } from "moleculer";
@@ -27,16 +27,13 @@ class CarService extends BaseServiceCustom<Car> {
 	public create(ctx: Context<Car>) {
 		const car: Car = {
 			_id: ctx.params._id,
-			entryAt: ctx.params.entryAt,
+			entryAt: new Date(ctx.params.entryAt || new Date()),
 			licensePlates: ctx.params.licensePlates,
 			name: ctx.params.name,
 			description: ctx.params.description,
 			origin: ctx.params.origin,
 		};
-		return car;
-		// var check = ValidateHelper.validateJoi<Car>(carValidate, car);
-		// return check;
-		// return this._customCreate(ctx, car);
+		return this._customCreate(ctx, car);
 	}
 	@Action()
 	public async list(ctx: Context<IList>) {

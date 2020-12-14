@@ -15,6 +15,8 @@ import { Ticket } from "@Core/base-carOwner/Ticket";
 import { ChairCar } from "@Core/base-carOwner/ChairCar";
 import { DateHelper } from "server/helper/DateHelper";
 import { IGet } from "@Core/query/IGet";
+import { ListChairCar } from "@Core/controller.ts/ListChairCar";
+import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -46,7 +48,7 @@ class TripService extends BaseServiceCustom<Trip> {
 		return this._customCreate(ctx, trip);
 	}
 	@Action()
-	public list(ctx: Context<IList>) {
+	public async list(ctx: Context<IList>) {
 		return this._customList(ctx, ctx.params);
 	}
 
@@ -102,18 +104,20 @@ class TripService extends BaseServiceCustom<Trip> {
 	@Action()
 	async getChairByTrip(ctx: Context<{ id: string }>) {
 		var trip: Trip = await this._customGet(ctx, { id: ctx.params.id });
-		const chairOfCar: Array<
-			Array<Ticket>
-		> = await ctx.call(`${serviceName.chairCar}.getByCarId`, {
+		const chairOfCar: ListChairCar = await ctx.call(`${serviceName.chairCar}.getByCarId`, {
 			carId: trip.carId,
 		});
+		
+	console.table(trip);
+		console.table(chairOfCar);
 		const getTicket: [] = await ctx.call(`${serviceName.ticket}.find`, {
 			query: {
 				tripId: trip._id,
 			},
 		} as IFind);
 
-		let newDiagramChair = chairOfCar.map((floor: any) => {
+
+		let newDiagramChair = chairOfCar.dataListChar.map((floor: any) => {
 			return floor.map((row: any) => {
 				return row.map((chair: ChairCar) => {
 					let saveColumn: ChairCar = chair;
@@ -145,7 +149,9 @@ class TripService extends BaseServiceCustom<Trip> {
 			});
 		});
 
-		return newDiagramChair;
+	return {
+		dataListChair : newDiagramChair
+	} as DiagramChairOfTrip
 	}
 
 	formatDate(date: Date) : Date{

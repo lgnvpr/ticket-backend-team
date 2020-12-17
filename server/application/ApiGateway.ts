@@ -72,6 +72,10 @@ const ApiService: ServiceSchema = {
 
           "GET trip/getListByDate" : `${serviceName.trip}.getListByDate`,
           "GET trip/getChairByTrip/:id" : `${serviceName.trip}.getChairByTrip`,
+
+          "GET statistics/IntervalRevenue" : `${serviceName.statistics}.IntervalRevenue`,
+          "GET statistics/IntervalTicket" : `${serviceName.statistics}.IntervalTicket`,
+          "GET statistics/StatisticalSummary" : `${serviceName.statistics}.StatisticalSummary`,
           
 
           

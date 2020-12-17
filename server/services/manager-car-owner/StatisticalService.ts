@@ -17,14 +17,14 @@ const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
 @Service({
-	name: serviceName.car,
+	name: serviceName.statistics,
 	mixins: [DbService],
 	adapter: new MongoDBAdapter(config.URLDb),
-	collection: serviceName.car,
+	collection: serviceName.statistics,
 })
 class StatisticalService extends BaseServiceCustom<Car> {
 	@Action()
-	async InvervalTicket(ctx: Context<any>) {
+	async IntervalTicket(ctx: Context<any>) {
 		const data =  this.exportDataChar(
 			await ctx.call(`${serviceName.ticket}.charTicket`, {
 				type: ctx.params.type,
@@ -35,7 +35,7 @@ class StatisticalService extends BaseServiceCustom<Car> {
 	}
 
 	@Action()
-	async InvervalRevenue(ctx: Context<any>) {
+	async IntervalRevenue(ctx: Context<any>) {
 		return this.exportDataChar(
 			await ctx.call(`${serviceName.ticket}.charRevenue`, {
 				type: ctx.params.type,
@@ -43,6 +43,7 @@ class StatisticalService extends BaseServiceCustom<Car> {
 		)
 	}
 
+	@Action()
 	async StatisticalSummary(ctx: Context<any>) {
 		var statistic: Summary = {
 			totalCustomer: await ctx.call(`${serviceName.customer}.count`),

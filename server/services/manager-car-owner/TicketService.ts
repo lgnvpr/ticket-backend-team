@@ -82,7 +82,7 @@ class TicketService extends BaseServiceCustom<Ticket> {
 	}
 
 	@Action()
-	public totalRevenue(ctx: Context) {
+	public async totalRevenue(ctx: Context) {
 		return this.adapter.collection.aggregate([
 			{ $match: {} },
 			{
@@ -93,9 +93,12 @@ class TicketService extends BaseServiceCustom<Ticket> {
 					as: "trip",
 				},
 			},
-			{ $unwind: "$Trip" },
+			{ $unwind: "$trip" },
 			{ $group: { _id: "trip", totalRevenue: { $sum: "$trip.price" } } },
-		]);
+		]).toArray().then(([res])=>{
+			return res.totalRevenue
+		})
+		
 	}
 
 	@Action()
@@ -105,7 +108,7 @@ class TicketService extends BaseServiceCustom<Ticket> {
 			{ $match: {} },
 			{
 				$lookup: {
-					from: "Trip",
+					from: "trip",
 					localField: "tripId",
 					foreignField: "_id",
 					as: "Trip",
@@ -118,7 +121,7 @@ class TicketService extends BaseServiceCustom<Ticket> {
 					data: { $sum: "$Trip.price" },
 				},
 			},
-		]);
+		]).toArray();
 	}
 
 	@Action()

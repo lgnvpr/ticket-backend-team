@@ -17,6 +17,7 @@ import { DateHelper } from "server/helper/DateHelper";
 import { IGet } from "@Core/query/IGet";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
+import { Customer } from "@Core/base-carOwner/Customer";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -108,25 +109,32 @@ class TripService extends BaseServiceCustom<Trip> {
 			carId: trip.carId,
 		});
 		
-	console.table(trip);
-		console.table(chairOfCar);
-		const getTicket: [] = await ctx.call(`${serviceName.ticket}.find`, {
+		var getTicket: Ticket[] = await ctx.call(`${serviceName.ticket}.find`, {
 			query: {
 				tripId: trip._id,
 			},
 		} as IFind);
 
-
+		const customerIds = getTicket.map(ticket => ticket.customerId); 
+		const getCustomer: Customer[] = await ctx.call(`${serviceName.customer}.get` ,{id : customerIds});
+		getTicket = getTicket.map(ticket =>{
+			if(Object.entries(ticket.metaMapping || {}).length ==0){
+				ticket.metaMapping = {}
+			}
+			ticket.metaMapping.customer = getCustomer.find(customer =>  customer._id == ticket.customerId)  
+			return ticket
+		});
 		let newDiagramChair = chairOfCar.dataListChar.map((floor: any) => {
 			return floor.map((row: any) => {
 				return row.map((chair: ChairCar) => {
 					let saveColumn: ChairCar = chair;
 					if (saveColumn._id) {
 						let getTickOfChair: Ticket = getTicket.find(
-							(tick: Ticket) => tick._id == saveColumn._id
+							(ticket: Ticket) => ticket.chairCarId == saveColumn._id
 						);
 						if (getTickOfChair) {
 							getTickOfChair.metaMapping = {
+								...getTickOfChair.metaMapping, 
 								chairCar: saveColumn,
 								trip: trip,
 							};

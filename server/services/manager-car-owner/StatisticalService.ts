@@ -12,7 +12,7 @@ import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { DateHelper } from "server/helper/DateHelper";
-import { ChartDay, Statistical } from "@Core/controller.ts/Statistical";
+import { IntervalTicketChart, Summary } from "@Core/controller.ts/Statistical";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 
@@ -23,28 +23,38 @@ const DbService = require("moleculer-db");
 	collection: serviceName.car,
 })
 class StatisticalService extends BaseServiceCustom<Car> {
-	async Statistical(ctx: Context<any>) {
-		var statistic: Statistical = {
+	@Action()
+	async InvervalTicket(ctx: Context<any>) {
+		const data =  this.exportDataChar(
+			await ctx.call(`${serviceName.ticket}.charTicket`, {
+				type: ctx.params.type,
+			})
+		)
+
+		return data 
+	}
+
+	@Action()
+	async InvervalRevenue(ctx: Context<any>) {
+		return this.exportDataChar(
+			await ctx.call(`${serviceName.ticket}.charRevenue`, {
+				type: ctx.params.type,
+			})
+		)
+	}
+
+	async StatisticalSummary(ctx: Context<any>) {
+		var statistic: Summary = {
 			totalCustomer: await ctx.call(`${serviceName.customer}.count`),
 			totalRevenue: await ctx.call(`${serviceName.ticket}.totalRevenue`),
 			totalTicket: await ctx.call(`${serviceName.ticket}.count`),
 			totalTrip: await ctx.call(`${serviceName.trip}.count`),
-			charTicket: this.exportDataChar(
-				await ctx.call(`${serviceName.ticket}.charTicket`, {
-					type: ctx.params.type,
-				})
-			),
-			charRevenue: this.exportDataChar(
-				await ctx.call(`${serviceName.ticket}.charRevenue`, {
-					type: ctx.params.type,
-				})
-			),
 		};
 		return statistic;
 	}
 
 	private exportDataChar(data: any, numberLoop: number = 7): any {
-		let newData: ChartDay[] = data.map((dataChar) => {
+		let newData: IntervalTicketChart[] = data.map((dataChar) => {
 			let date: Date = new Date(
 				`${dataChar._id.year}/${dataChar._id.month}/${dataChar._id.day}`
 			);
@@ -53,7 +63,7 @@ class StatisticalService extends BaseServiceCustom<Car> {
 			delete dataChar._id;
 			return dataChar;
 		});
-		let returnData: ChartDay[] = [];
+		let returnData: IntervalTicketChart[] = [];
 		for (let i = 0; i < numberLoop; i++) {
 			let dateNeedRender: Date = DateHelper.removeToDDMMYYY(new Date());
 			dateNeedRender.setDate(dateNeedRender.getDate() - i);

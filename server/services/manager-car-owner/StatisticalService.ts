@@ -13,16 +13,21 @@ import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { DateHelper } from "server/helper/DateHelper";
 import { IntervalTicketChart, Summary } from "@Core/controller.ts/Statistical";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel copy";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.statistics,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	
+	dependencies: ["dbCustomSequelize"],
 	collection: serviceName.statistics,
 })
-class StatisticalService extends BaseServiceCustom<Car> {
+class StatisticalService extends BaseServiceWithSequelize<Car> {
 	@Action()
 	async IntervalTicket(ctx: Context<any>) {
 		const data =  this.exportDataChar(

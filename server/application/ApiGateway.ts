@@ -19,6 +19,7 @@ const ApiService: ServiceSchema = {
         next();
       },
     ],
+    
     cors: {
         // Configures the Access-Control-Allow-Origin CORS header.
         origin: "*",
@@ -35,6 +36,10 @@ const ApiService: ServiceSchema = {
     },
     routes: [
       {
+        onBeforeCall(ctx, route, req, res) {
+          // Set request headers to context meta
+          ctx.broker.cacher.clean();
+      },
         aliases: {
           
           // additional treatment resource

@@ -11,13 +11,24 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel copy";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.ticket,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
+	model: {
+		name: serviceName.ticket,
+		define: ticketModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
 	settings: {
 		populates: [
 			{ field: "trip", service: serviceName.car, filedGet: "positionId" },
@@ -36,7 +47,7 @@ const DbService = require("moleculer-db");
 	},
 	collection: serviceName.ticket,
 })
-class TicketService extends BaseServiceCustom<Ticket> {
+class TicketService extends BaseServiceWithSequelize<Ticket> {
 	@Action()
 	public async create(ctx: Context<Ticket>) {
 		let params: any = ctx.params;
@@ -56,86 +67,63 @@ class TicketService extends BaseServiceCustom<Ticket> {
 		ticket.customerId = getCustomer._id.toString();
 		return this._customCreate(ctx, ticket);
 	}
-	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
-	}
-
-	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
-	}
+	
 
 	@Action()
 	public async totalRevenue(ctx: Context) {
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$lookup: {
-					from: "trip",
-					localField: "tripId",
-					foreignField: "_id",
-					as: "trip",
-				},
-			},
-			{ $unwind: "$trip" },
-			{ $group: { _id: "trip", totalRevenue: { $sum: "$trip.price" } } },
-		]).toArray().then(([res])=>{
-			return res.totalRevenue
-		})
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$lookup: {
+		// 			from: "trip",
+		// 			localField: "tripId",
+		// 			foreignField: "_id",
+		// 			as: "trip",
+		// 		},
+		// 	},
+		// 	{ $unwind: "$trip" },
+		// 	{ $group: { _id: "trip", totalRevenue: { $sum: "$trip.price" } } },
+		// ]).toArray().then(([res])=>{
+		// 	return res.totalRevenue
+		// })
 		
 	}
 
 	@Action()
 	public async charRevenue(ctx: Context<any>) {
 		let typeGet: any = this.getType(ctx.params.type);
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$lookup: {
-					from: "trip",
-					localField: "tripId",
-					foreignField: "_id",
-					as: "Trip",
-				},
-			},
-			{ $unwind: "$Trip" },
-			{
-				$group: {
-					_id: typeGet,
-					data: { $sum: "$Trip.price" },
-				},
-			},
-		]).toArray();
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$lookup: {
+		// 			from: "trip",
+		// 			localField: "tripId",
+		// 			foreignField: "_id",
+		// 			as: "Trip",
+		// 		},
+		// 	},
+		// 	{ $unwind: "$Trip" },
+		// 	{
+		// 		$group: {
+		// 			_id: typeGet,
+		// 			data: { $sum: "$Trip.price" },
+		// 		},
+		// 	},
+		// ]).toArray();
 	}
 
 	@Action()
 	public async charTicket(ctx: Context<any>) {
 		let typeGet: any = this.getType(ctx.params.type);
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$group: {
-					_id: typeGet,
-					data: { $sum: 1 },
-				},
-			},
-		]);
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$group: {
+		// 			_id: typeGet,
+		// 			data: { $sum: 1 },
+		// 		},
+		// 	},
+		// ]);
 	}
 
 	public getType(type: string): any {

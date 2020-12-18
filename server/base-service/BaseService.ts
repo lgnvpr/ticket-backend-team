@@ -15,7 +15,6 @@ const errorMessage =
 export class BaseService<T extends BaseModel>
   extends MoleculerService
   implements IBaseService<T> {
-  
 
   async _find(ctx: Context, params: IFind): Promise<T[]> {
     throw Error(errorMessage);
@@ -27,7 +26,7 @@ export class BaseService<T extends BaseModel>
     throw Error(errorMessage);
   }
   async _create(ctx: Context, t: T): Promise<T> {
-    return {...t,id : "2222"};
+    throw Error(errorMessage);
   }
   async _insert(ctx: Context, params: any): Promise<T | T[]> {
     throw Error(errorMessage);

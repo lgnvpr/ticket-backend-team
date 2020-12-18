@@ -18,13 +18,24 @@ import { IGet } from "@Core/query/IGet";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { Customer } from "@Core/base-carOwner/Customer";
+import { tripModelSequelize } from "server/model-sequelize/TripModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.trip,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
+	model: {
+		name: serviceName.trip,
+		define: tripModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
 	metadata: {},
 	settings: {
 		populates: [
@@ -35,43 +46,7 @@ const DbService = require("moleculer-db");
 	},
 	collection: serviceName.trip,
 })
-class TripService extends BaseServiceCustom<Trip> {
-	@Action()
-	public create(ctx: Context<Trip>) {
-		const trip: Trip = {
-			carId: ctx.params.carId,
-			_id: ctx.params._id,
-			price: ctx.params.price,
-			driveId: ctx.params.driveId,
-			routeId: ctx.params.routeId,
-			timeStart: new Date(ctx.params.timeStart) || new Date(),
-		};
-		return this._customCreate(ctx, trip);
-	}
-	@Action()
-	public async list(ctx: Context<IList>) {
-		return this._customList(ctx, ctx.params);
-	}
-
-	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
-	}
+class TripService extends BaseServiceWithSequelize<Trip> {
 
 	@Action()
 	getListByDate(ctx: Context<IGetByDate>) {

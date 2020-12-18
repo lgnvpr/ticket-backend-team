@@ -13,69 +13,50 @@ import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { IGet } from "@Core/query/IGet";
 import { ValidateHelper } from "server/helper/ValidateHelper";
+import { carModelSequelize } from "server/model-sequelize/CarModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { ChairCarServerController } from "server/controller-server/ChairCarServerController";
+import { chairCarControllerServer } from "server/controller-server";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.car,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
+	model: {
+		name: serviceName.car,
+		define: carModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
+
 	collection: serviceName.car,
 })
-class CarService extends BaseServiceCustom<Car> {
-	@Action()
-	public create(ctx: Context<Car>) {
-		const car: Car = {
-			_id: ctx.params._id,
-			entryAt: new Date(ctx.params.entryAt || new Date()),
-			licensePlates: ctx.params.licensePlates,
-			name: ctx.params.name,
-			description: ctx.params.description,
-			origin: ctx.params.origin,
-		};
-		return this._customCreate(ctx, car);
-	}
+class CarService extends BaseServiceWithSequelize<Car> {
 	@Action()
 	public async list(ctx: Context<IList>) {
-		var listCar: Paging<Car> = await this._customList(ctx, ctx.params);
-		const carIds = listCar.rows.map((car) => car._id);
+		var listCar: Paging<Car> = await this._sequelizeList(ctx.params);
+		const carIds = listCar.rows.map((car) => car.id);
 		const countCharOfCar: {
-			_id: string;
+			carId: string;
 			count: number;
-		}[] = await ctx.call(`${serviceName.chairCar}.countGroupByCarIds`, {
-			id: carIds,
-		});
+		}[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
 
-		listCar.rows.map((car) => {
+		console.log(countCharOfCar)
+		console.log(listCar)
+		listCar.rows=  listCar.rows.map((car) => {
 			const getTotalChair = countCharOfCar.find(
-				(count) => count._id == car._id
+				(count) => count.carId == car.id
 			);
-			car.metaMapping = {
-				totalChair: getTotalChair?.count,
-			};
+			console.log(getTotalChair)
+			car.totalChair = getTotalChair?.count;
 			return car;
 		});
 		return listCar;
-	}
-
-	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
 	}
 }
 

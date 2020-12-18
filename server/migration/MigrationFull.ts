@@ -9,7 +9,7 @@ import { MongoService } from "./ConnectDbMigration";
 import * as data from "./DataExample"
 import { ChairCar } from "@Core/base-carOwner/ChairCar";
 const { v4: uuidv4 } = require('uuid');
-console.log("Staff Migration ................")
+ ("Staff Migration ................")
 export enum Status {
     active = "active",
     deleted = "deleted",
@@ -149,7 +149,7 @@ async function create() {
             await MongoService._create(serviceName.chairCar,listChair );   
         }
     } catch (err) {
-        console.log(err);
+         (err);
     }
 }
 

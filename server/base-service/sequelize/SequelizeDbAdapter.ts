@@ -39,7 +39,7 @@ class SequelizeDbAdapter<T extends BaseModel>{
     if (sequelizeInstance && sequelizeInstance instanceof Sequelize)
       this.db = sequelizeInstance;
     else this.db = new Sequelize(...this.opts);
-    console.log(this.db);
+     (this.db);
 
     return this.db.authenticate().then(() => {
       let modelDefinitionOrInstance = this.service.schema.model;
@@ -241,7 +241,7 @@ class SequelizeDbAdapter<T extends BaseModel>{
     if (isCounting) return this.model.count(q);
 
     return this.model.findAll(q).then((items) => {
-      console.log(items.map((item) => item.dataValues));
+       (items.map((item) => item.dataValues));
       return items;
     });
   }

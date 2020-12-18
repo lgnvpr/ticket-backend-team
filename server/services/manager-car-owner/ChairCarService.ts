@@ -11,13 +11,24 @@ import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
+import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.chairCar,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
+	model: {
+		name: serviceName.chairCar,
+		define: chairCarModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
 	settings: {
 		populates: [
 			{ field: "car", service: serviceName.car, filedGet: "carId" },
@@ -25,56 +36,36 @@ const DbService = require("moleculer-db");
 	},
 	collection: serviceName.chairCar,
 })
-class ChairCarService extends BaseServiceCustom<ChairCar> {
-	@Action()
-	public create(ctx: Context<ChairCar>) {
-		return this._customCreate(ctx, ctx.params);
-	}
-	@Action()
-	public list(ctx: Context<IList>) {
-		return this._customList(ctx, ctx.params);
-	}
-
-	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
-	}
+class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 
 	@Action()
 	public countGroupByCarIds(ctx: Context<any>) {
-        var carIds = ctx.params.id ||"" ;
-		return this.adapter.collection
-			.aggregate([
-				{
-					$match: {
-						carId: {
-							$in: carIds
-						},
-					},
-				},
-				{
-					$group: {
-						_id: "$carId",
-						count: { $sum: 1 },
-					},
-				},
-			])
-			.toArray();
+		 (ctx.params)
+        var carIds = ctx.params.carIds ||"" ;
+		// return this.adapter.collection
+		// 	.aggregate([
+		// 		{
+		// 			$match: {
+		// 				carId: {
+		// 					$in: carIds
+		// 				},
+		// 			},
+		// 		},
+		// 		{
+		// 			$group: {
+		// 				_id: "$carId",
+		// 				count: { $sum: 1 },
+		// 			},
+		// 		},
+		// 	])
+		// 	.toArray();
+		const sql = `select chair_cars."carId" , count(*) from chair_cars
+		where "carId" in (?)
+		group by chair_cars."carId" 
+		`
+		return this.adapter.db.query(sql, {replacements : [carIds]}).then(([res]: any)=>{
+			return res
+		})
 	}
 
 	@Action()
@@ -114,14 +105,15 @@ class ChairCarService extends BaseServiceCustom<ChairCar> {
 				}
 			}
 		}
-		return this._customCreateMany(ctx, listChair as any);
+		
+		return this._sequelizeCreate(listChair as any);
 	}
 
 	@Action()
 	public async getByCarId(ctx: Context) {
 		let params: any = ctx.params;
 		var carId: any = params.carId.toString();
-		let getData: ChairCar[] = await this._customFind(ctx, {
+		let getData: ChairCar[] = await this._sequelizeFind( {
 			query: { carId: carId }
 		});
 		let floor: Array<any> = [];

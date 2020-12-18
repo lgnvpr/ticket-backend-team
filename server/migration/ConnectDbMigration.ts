@@ -23,7 +23,7 @@ export class MongoService{
 
     public static async _create(collection, data): Promise<any> {
         let params: any = data
-        console.log("\x1b[31m", `============Create for ${collection}====================`);
+         ("\x1b[31m", `============Create for ${collection}====================`);
         if (Array.isArray(params)) {
             params.map((params) => {
                 params.status = "active",
@@ -35,7 +35,7 @@ export class MongoService{
                 return params;
             })
             return this.collection(collection).insertMany(params)
-                .then(res => { console.log(res); return res })
+                .then(res => {  (res); return res })
                 .catch(err => err);
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date(), updateBy: "" }
@@ -47,7 +47,7 @@ export class MongoService{
             customParams._id = uuidv4();
         }
         return this.collection(collection).insert(customParams)
-            .then(res => {console.log(res);return customParams})
+            .then(res => { (res);return customParams})
             .catch(err => err);
     }   
 

@@ -6,9 +6,9 @@ export class QueryHelper {
 		!query ? (query = {}) : (query = query);
 
     let querySearches = this.convertSearchesToQuery(search);
-    console.log(querySearches);
+     (querySearches);
     var a = { $and: [query, querySearches] }
-    // console.log(a);
+    //  (a);
 		return { $and: [query, querySearches] };
 	}
 

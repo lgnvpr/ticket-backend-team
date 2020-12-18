@@ -10,49 +10,31 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
+import { staffModelSequelize } from "server/model-sequelize/StaffModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.staff,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
 	settings : {
 		populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
 	},
+	model: {
+		name: serviceName.staff,
+		define: staffModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
 	collection: serviceName.staff,
 })
-class StaffService extends BaseServiceCustom<Staff> {
-	@Action()
-	public create(ctx: Context<Staff>) {
-		return this._customCreate(ctx, ctx.params);
-	}
-	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
-	}
-
-	@Action()
-	public remove(ctx: Context<{id: string}>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind> ){
-		console.log(ctx.params)
-		return this._customFind(ctx, ctx.params)
-	}
+class StaffService extends BaseServiceWithSequelize<Staff> {
+	
 }
 
 module.exports = StaffService;

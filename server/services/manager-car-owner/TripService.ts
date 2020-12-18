@@ -18,13 +18,25 @@ import { IGet } from "@Core/query/IGet";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { Customer } from "@Core/base-carOwner/Customer";
+import { tripModelSequelize } from "server/model-sequelize/TripModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { Op } from "sequelize";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
 	name: serviceName.trip,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(config.URLPostgres, {
+		noSync: true,
+	}),
+	model: {
+		name: serviceName.trip,
+		define: tripModelSequelize,
+	},
+	dependencies: ["dbCustomSequelize"],
 	metadata: {},
 	settings: {
 		populates: [
@@ -35,43 +47,7 @@ const DbService = require("moleculer-db");
 	},
 	collection: serviceName.trip,
 })
-class TripService extends BaseServiceCustom<Trip> {
-	@Action()
-	public create(ctx: Context<Trip>) {
-		const trip: Trip = {
-			carId: ctx.params.carId,
-			_id: ctx.params._id,
-			price: ctx.params.price,
-			driveId: ctx.params.driveId,
-			routeId: ctx.params.routeId,
-			timeStart: new Date(ctx.params.timeStart) || new Date(),
-		};
-		return this._customCreate(ctx, trip);
-	}
-	@Action()
-	public async list(ctx: Context<IList>) {
-		return this._customList(ctx, ctx.params);
-	}
-
-	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
-	}
+class TripService extends BaseServiceWithSequelize<Trip> {
 
 	@Action()
 	getListByDate(ctx: Context<IGetByDate>) {
@@ -83,6 +59,18 @@ class TripService extends BaseServiceCustom<Trip> {
 			from : new Date(new Date(query.from).setDate(query.from.getDate())),
 			to : new Date(new Date(query.to).setDate(query.to.getDate()+1)),
 		}
+		return this.adapter.model.findAndCountAll({
+			where : {
+				[Op.and]: [
+					{}
+				]
+			},
+			limit : 10,
+			offset : 0 
+		}).then(res=>{
+			 (res)
+			return res
+		})
 		return this._customList(ctx, {
 			query: {
 				timeStart: {
@@ -104,50 +92,45 @@ class TripService extends BaseServiceCustom<Trip> {
 
 	@Action()
 	async getChairByTrip(ctx: Context<{ id: string }>) {
-		var trip: Trip = await this._customGet(ctx, { id: ctx.params.id });
+		var trip: Trip = await this._get(ctx, { id: ctx.params.id });
 		const chairOfCar: ListChairCar = await ctx.call(`${serviceName.chairCar}.getByCarId`, {
 			carId: trip.carId,
 		});
 		
 		var getTicket: Ticket[] = await ctx.call(`${serviceName.ticket}.find`, {
 			query: {
-				tripId: trip._id,
+				tripId: trip.id,
 			},
 		} as IFind);
 
 		const customerIds = getTicket.map(ticket => ticket.customerId); 
 		const getCustomer: Customer[] = await ctx.call(`${serviceName.customer}.get` ,{id : customerIds});
 		getTicket = getTicket.map(ticket =>{
-			if(Object.entries(ticket.metaMapping || {}).length ==0){
-				ticket.metaMapping = {}
-			}
-			ticket.metaMapping.customer = getCustomer.find(customer =>  customer._id == ticket.customerId)  
+			ticket.customer = getCustomer.find(customer =>  customer.id == ticket.customerId)  
 			return ticket
 		});
 		let newDiagramChair = chairOfCar.dataListChar.map((floor: any) => {
 			return floor.map((row: any) => {
 				return row.map((chair: ChairCar) => {
 					let saveColumn: ChairCar = chair;
-					if (saveColumn._id) {
+					if (saveColumn.id) {
 						let getTickOfChair: Ticket = getTicket.find(
-							(ticket: Ticket) => ticket.chairCarId == saveColumn._id
+							(ticket: Ticket) => ticket.chairCarId == saveColumn.id
 						);
 						if (getTickOfChair) {
-							getTickOfChair.metaMapping = {
-								...getTickOfChair.metaMapping, 
-								chairCar: saveColumn,
+							getTickOfChair = {
+								...getTickOfChair, 
+								chair_car: saveColumn,
 								trip: trip,
 							};
 							return getTickOfChair;
 						} else {
 							return {
-								tripId: trip._id,
-								carId: trip?.metaMapping?.car._id,
-								chairCarId: saveColumn._id,
-								metaMapping: {
-									chairCar : saveColumn,
-									trip : trip
-								},
+								tripId: trip.id,
+								carId: trip?.car?.id,
+								chairCarId: saveColumn.id,
+								chairCar : saveColumn,
+								trip : trip
 							} as Ticket;
 						}
 					} else {

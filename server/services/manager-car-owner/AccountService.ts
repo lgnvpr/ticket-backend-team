@@ -17,45 +17,39 @@ import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import { ChairCarServerController } from "server/controller-server/ChairCarServerController";
 import { chairCarControllerServer } from "server/controller-server";
+import { staffModelSequelize } from "server/model-sequelize/StaffModel";
+import jwt from 'jsonwebtoken';
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
 const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
+
 @Service({
-	name: serviceName.car,
+	name: serviceName.account,
 	mixins: [DBServiceCustom],
 	adapter: new SqlAdapter(config.URLPostgres, {
 		noSync: true,
 	}),
 	model: {
-		name: serviceName.car,
-		define: carModelSequelize,
+		name: serviceName.account,
+		define: staffModelSequelize,
 	},
 	dependencies: ["dbCustomSequelize"],
 
 	collection: serviceName.car,
 })
-class CarService extends BaseServiceWithSequelize<Car> {
+class AccountService extends BaseServiceWithSequelize<Car> {
 	@Action()
-	public async list(ctx: Context<IList>) {
-		var listCar: Paging<Car> = await this._sequelizeList(ctx.params);
-		const carIds = listCar.rows.map((car) => car.id);
-		const countCharOfCar: {
-			carId: string;
-			count: number;
-		}[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
-
-		listCar.rows=  listCar.rows.map((car) => {
-			const getTotalChair = countCharOfCar.find(
-				(count) => count.carId == car.id
-			);
-			console.log(getTotalChair)
-			car.totalChair = getTotalChair?.count;
-			return car;
-		});
-		return listCar;
+	public async login(ctx: Context) {
+		const params:any = ctx.params
+		if(params.user ==  "admin" && params.password == "admin"){
+			return jwt.sign({very : "abc"}, "aleTeam")
+		}
+		else {
+			return "Password and user is codsa"
+		}
 	}
 }
 
-module.exports = CarService;
+module.exports = AccountService;

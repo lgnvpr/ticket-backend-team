@@ -6,7 +6,7 @@ import { SequelizeAttributes } from "server/base-service/sequelize/SequelizeAttr
 import {baseModelSequelize} from "./BaseModel"
 export const staffModelSequelize: SequelizeAttributes<Staff> = {
     ...baseModelSequelize,
-    name :{type: DataTypes.STRING(50), allowNull: true},
+    name :{type: DataTypes.STRING(53), allowNull: true},
     address : {type: DataTypes.STRING(200), allowNull: true},
     avt : {type: DataTypes.TEXT, allowNull: true},
     birthAt : {type: DataTypes.DATE, allowNull: true},

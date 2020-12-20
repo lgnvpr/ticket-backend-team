@@ -31,7 +31,7 @@ export class BaseServiceController<T extends BaseModel> {
     return ctx.broker.call(`${this.serviceName}.insert`, params);
   }
 
-  async _get(ctx: Context, params: any): Promise<T | undefined> {
+  async _get(ctx: Context, params: {id : string}): Promise<T | undefined> {
     return ctx.broker.call(`${this.serviceName}.get`, params);
   }
 //   async _update(ctx: Context, t: T): Promise<T> {

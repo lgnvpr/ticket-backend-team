@@ -3,6 +3,8 @@ import { ServiceSchema } from "moleculer";
 import { serviceName } from "@Core/query/NameService";
 import { authenticate, authorize } from "../helper/AuthenAndAuthor";
 import jwt from "jsonwebtoken";
+import { Account } from "@Core/base-carOwner/Account";
+import { staffControllerServer } from "server/controller-server";
 
 const ApiService: ServiceSchema = {
 	name: "ApiGateway",
@@ -43,7 +45,7 @@ const ApiService: ServiceSchema = {
 		},
 		routes: [
 			{
-				authentication: false,
+				authentication: true,
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
 					ctx.broker.cacher.clean();
@@ -53,6 +55,7 @@ const ApiService: ServiceSchema = {
                 },
 				aliases: {
 					// additional treatment resource
+					"REST account": serviceName.account,
 					"REST staff": serviceName.staff,
 					"REST position_staff": serviceName.position,
 					"REST car": serviceName.car,
@@ -91,10 +94,12 @@ const ApiService: ServiceSchema = {
 					"GET statistics/IntervalRevenue": `${serviceName.statistics}.IntervalRevenue`,
 					"GET statistics/IntervalTicket": `${serviceName.statistics}.IntervalTicket`,
 					"GET statistics/StatisticalSummary": `${serviceName.statistics}.StatisticalSummary`,
+
+					"GET getMe" : `${serviceName.account}.getMe`
 				},
 			},
 			{
-				authentication: true,
+				authentication: false,
 				bodyParsers: {
                     json: true
                 },
@@ -110,17 +115,20 @@ const ApiService: ServiceSchema = {
 	},
 	actions: {},
 	methods: {
-		// authenticate(ctx, route, req, res) {
-		// 	const auth = req.headers.authorization;
-		// 	try {
-		// 		const result = jwt.verify(auth, "aleTeam");
-		// 		// return Promise.resolve(ctx);
-		// 		// return JSON.parse(JSON.stringify(result));
-		// 	} catch (error) {
-		// 		throw new Error("Jwt Token invalid");
-		// 	}
+		async authenticate(ctx, route, req, res) {
+			const auth = req.headers.authorization;
+			try {
+				const result:Account = 
+				
+				ctx.meta.me = jwt.verify(auth, "aleTeam");
+				// req.$params = { ...req.$params };
+								// return JSON.parse(JSON.stringify(result));
+				// return Promise.resolve(ctx);
+			} catch (error) {
+				throw new Error("Jwt Token invalid");
+			}
 			
-		// },
+		},
 	},
 };
 

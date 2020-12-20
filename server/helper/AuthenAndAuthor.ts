@@ -3,7 +3,6 @@ import { Context } from "moleculer";
 
 export function authorize(ctx: Context, route: any, req: any, res: any) {
     const auth = req.headers.authorization;
-     ("-----------")
      (auth);
     try {
       req.$params = { ...req.$params };
@@ -15,6 +14,5 @@ export function authorize(ctx: Context, route: any, req: any, res: any) {
   }
 export async function authenticate(ctx: Context, route: any, req: any, res: any) {
   const auth = req.headers.authenticate;
-   ("-----------")
    (auth);
 }

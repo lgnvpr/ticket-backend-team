@@ -17,6 +17,7 @@ import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import { ChairCarServerController } from "server/controller-server/ChairCarServerController";
 import { chairCarControllerServer } from "server/controller-server";
+import { SequelizeDbAdapterProps } from "server/base-service/sequelize/SequelizeDbAdapter";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -37,23 +38,23 @@ const SqlAdapter = require("moleculer-db-adapter-sequelize");
 	collection: serviceName.car,
 })
 class CarService extends BaseServiceWithSequelize<Car> {
+	
 	@Action()
 	public async list(ctx: Context<IList>) {
 		var listCar: Paging<Car> = await this._sequelizeList(ctx.params);
 		const carIds = listCar.rows.map((car) => car.id);
-		const countCharOfCar: {
-			carId: string;
-			count: number;
-		}[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
+		// const countCharOfCar: {
+		// 	carId: string;
+		// 	count: number;
+		// }[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
 
-		listCar.rows=  listCar.rows.map((car) => {
-			const getTotalChair = countCharOfCar.find(
-				(count) => count.carId == car.id
-			);
-			console.log(getTotalChair)
-			car.totalChair = getTotalChair?.count;
-			return car;
-		});
+		// listCar.rows=  listCar.rows.map((car) => {
+		// 	const getTotalChair = countCharOfCar.find(
+		// 		(count) => count.carId == car.id
+		// 	);
+		// 	car.totalChair = getTotalChair?.count;
+		// 	return car;
+		// });
 		return listCar;
 	}
 }

@@ -289,6 +289,7 @@ export interface Filter {
 }
 
 export interface SequelizeDbAdapterProps<T extends BaseModel>{
+  relations: any;
   db: SequelizeModel;
   model: ModelCtor<Result<T>>;
 }

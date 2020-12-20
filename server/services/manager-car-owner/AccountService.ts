@@ -16,13 +16,17 @@ import { ValidateHelper } from "server/helper/ValidateHelper";
 import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import { ChairCarServerController } from "server/controller-server/ChairCarServerController";
-import { chairCarControllerServer } from "server/controller-server";
+import { accountControllerServer, chairCarControllerServer, staffControllerServer } from "server/controller-server";
 import { staffModelSequelize } from "server/model-sequelize/StaffModel";
 import jwt from 'jsonwebtoken';
+import { accountModelModelSequelize } from "server/model-sequelize/AccountModel";
+import { Account } from "@Core/base-carOwner/Account";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
 const SqlAdapter = require("moleculer-db-adapter-sequelize");
+import md5 from 'md5';
+import { Op } from "sequelize";
 
 
 @Service({
@@ -33,23 +37,46 @@ const SqlAdapter = require("moleculer-db-adapter-sequelize");
 	}),
 	model: {
 		name: serviceName.account,
-		define: staffModelSequelize,
+		define: accountModelModelSequelize,
 	},
 	dependencies: ["dbCustomSequelize"],
 
 	collection: serviceName.car,
 })
-class AccountService extends BaseServiceWithSequelize<Car> {
+class AccountService extends BaseServiceWithSequelize<Account> {
 	@Action()
-	public async login(ctx: Context) {
-		const params:any = ctx.params
-		if(params.user ==  "admin" && params.password == "admin"){
-			return jwt.sign({very : "abc"}, "aleTeam")
+	public async create(ctx: Context<Account>){
+		return this._sequelizeCreate({
+			username : ctx.params.username,
+			staffId : ctx.params.staffId,
+			password : md5(ctx.params.password, "aleTeam")
+		})
+	}
+	
+	@Action()
+	getMe(ctx: Context<any, any>){
+		return ctx.meta.me
+	}
+
+	@Action()
+	public async login(ctx: Context<{username: string , password : string}>) {
+		console.log("on login")
+		const params:any = ctx.params;
+		const checkExit=await this.adapter.model.findOne({
+			where: {
+				[Op.and] : [
+					{username: params.username},
+					{password : md5(params.password, "aleTeam")}
+				]
+			}
+		})
+		const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit.dataValues.staffId})
+		if(checkStaff){
+			return jwt.sign(checkStaff, "aleTeam")
 		}
-		else {
-			return "Password and user is codsa"
-		}
+		throw new Error("Tên tài khoản hoặc mật khẩu không đúng");
 	}
 }
 
 module.exports = AccountService;
+

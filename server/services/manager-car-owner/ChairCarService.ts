@@ -40,7 +40,6 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 
 	@Action()
 	public countGroupByCarIds(ctx: Context<any>) {
-		 (ctx.params)
         var carIds = ctx.params.carIds ||"" ;
 		// return this.adapter.collection
 		// 	.aggregate([

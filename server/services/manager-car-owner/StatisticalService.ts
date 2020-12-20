@@ -24,7 +24,6 @@ const SqlAdapter = require("moleculer-db-adapter-sequelize");
 @Service({
 	name: serviceName.statistics,
 	mixins: [DBServiceCustom],
-
 	dependencies: ["dbCustomSequelize"],
 	collection: serviceName.statistics,
 })

@@ -5,6 +5,7 @@ import { authenticate, authorize } from "../helper/AuthenAndAuthor";
 import jwt from "jsonwebtoken";
 import { Account } from "@Core/base-carOwner/Account";
 import { staffControllerServer } from "server/controller-server";
+import { AleError } from "server/common/AleError";
 
 const ApiService: ServiceSchema = {
 	name: "ApiGateway",
@@ -118,14 +119,9 @@ const ApiService: ServiceSchema = {
 		async authenticate(ctx, route, req, res) {
 			const auth = req.headers.authorization;
 			try {
-				const result:Account = 
-				
 				ctx.meta.me = jwt.verify(auth, "aleTeam");
-				// req.$params = { ...req.$params };
-								// return JSON.parse(JSON.stringify(result));
-				// return Promise.resolve(ctx);
 			} catch (error) {
-				throw new Error("Jwt Token invalid");
+				throw  AleError.unauthenticated()
 			}
 			
 		},

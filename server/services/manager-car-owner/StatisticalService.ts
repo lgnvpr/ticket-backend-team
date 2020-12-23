@@ -13,7 +13,7 @@ import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { DateHelper } from "server/helper/DateHelper";
 import { IntervalTicketChart, Summary } from "@Core/controller.ts/Statistical";
-import { ticketModelSequelize } from "server/model-sequelize/TicketModel copy";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import moment from "moment";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");

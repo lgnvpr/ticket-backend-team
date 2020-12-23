@@ -16,18 +16,12 @@ import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServ
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.route,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.route,
-		define: routeModelSequelize,
-	},
+	adapter: new SqlAdapter(routeModelSequelize, []),
 	dependencies: ["dbCustomSequelize"],
 	collection: serviceName.route,
 })

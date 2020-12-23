@@ -1,54 +1,35 @@
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 "use strict";
-import { IFind } from "@Core/query/IFind";
-import BaseServiceCustom from "@Service/BaseServiceCustom";
-import { Service as MoleculerService, Context } from "moleculer";
-import { Action, Method, Service } from "moleculer-decorators";
-import { Staff } from "server/base-ticket-team/base-carOwner/Staff";
-import { IList } from "server/base-ticket-team/query/IList";
-import { serviceName } from "@Core/query/NameService";
-import config from "server/config";
-import { Trip } from "@Core/base-carOwner/Trip";
-import { IGetByDate } from "@Core/controller.ts/TripController";
-import { Ticket } from "@Core/base-carOwner/Ticket";
+import config from "@Config/index";
 import { ChairCar } from "@Core/base-carOwner/ChairCar";
-import { DateHelper } from "server/helper/DateHelper";
-import { IGet } from "@Core/query/IGet";
-import { ListChairCar } from "@Core/controller.ts/ListChairCar";
-import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { Customer } from "@Core/base-carOwner/Customer";
-import { tripModelSequelize } from "server/model-sequelize/TripModel";
-import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { Ticket } from "@Core/base-carOwner/Ticket";
+import { Trip } from "@Core/base-carOwner/Trip";
+import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
+import { ListChairCar } from "@Core/controller.ts/ListChairCar";
+import { IGetByDate } from "@Core/controller.ts/TripController";
+import { IFind } from "@Core/query/IFind";
+import { serviceName } from "@Core/query/NameService";
+import { Context } from "moleculer";
+import { Action, Service } from "moleculer-decorators";
 import { Op } from "sequelize";
-const MongoDBAdapter = require("moleculer-db-adapter-mongo");
-const DbService = require("moleculer-db");
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { carModelSequelize } from "server/model-sequelize/CarModel";
+import { routeModelSequelize } from "server/model-sequelize/RouteModel";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
+import { tripModelSequelize } from "server/model-sequelize/TripModel";
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.trip,
+	adapter: new Adapter(tripModelSequelize, [carModelSequelize, routeModelSequelize]),
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.trip,
-		define: tripModelSequelize,
-	},
 	dependencies: ["dbCustomSequelize"],
-	metadata: {},
-	settings: {
-		populates: [
-			{ field: "drive", service: serviceName.staff, filedGet: "driveId" },
-			{ field: "route", service: serviceName.route, filedGet: "routeId" },
-			{ field: "car", service: serviceName.car, filedGet: "carId" },
-		],
-	},
 	collection: serviceName.trip,
 })
 class TripService extends BaseServiceWithSequelize<Trip> {
-
 	@Action()
 	getListByDate(ctx: Context<IGetByDate>) {
 		var query: IGetByDate = {
@@ -71,14 +52,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 			 (res)
 			return res
 		})
-		return this._customList(ctx, {
-			query: {
-				timeStart: {
-					$gte: DateHelper.removeToDDMMYYY(query.from),
-					$lte: DateHelper.removeToDDMMYYY(query.to),
-				},
-			},
-		});
+		
 	}
 
 	@Action()

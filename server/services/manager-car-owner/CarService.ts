@@ -21,18 +21,12 @@ import { SequelizeDbAdapterProps } from "server/base-service/sequelize/Sequelize
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.car,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.car,
-		define: carModelSequelize,
-	},
+	adapter: new SqlAdapter(carModelSequelize, []),
 	dependencies: ["dbCustomSequelize"],
 
 	collection: serviceName.car,

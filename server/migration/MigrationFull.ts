@@ -47,8 +47,8 @@ async function create() {
                 name: listName[i],
                 phoneNumber : data.randomPhone(),
                 sex: data.randomSex(),
-                createAt: new Date(),
-                updateAt: new Date,
+                createdAt: new Date(),
+                updatedAt: new Date,
                 positionId: listPosition[Math.floor(Math.random() * listPosition.length - 2)]?._id
             }
             await MongoService._create(serviceName.staff, staff);
@@ -60,14 +60,14 @@ async function create() {
         for (let i = 0; i < 20; i++) {
             const car: Car ={
                 _id: uuidv4(),
-                createAt: new Date(),
+                createdAt: new Date(),
                 description: "No description",
                 entryAt: data.randomBirthDay(),
                 licensePlates: data.radomLicensePlates(),
                 name: `Ale team ${i+1}`,
                 origin: data.country[Math.floor(Math.random() * data.country.length)],
                 status: Status.active,
-                updateAt: new Date(),
+                updatedAt: new Date(),
                 statusCar: "using",
 
             } 
@@ -81,14 +81,14 @@ async function create() {
                 _id : uuidv4(),
                 birthAt: data.randomBirthDay(),
                 CMND: data.randomCmnd(),
-                createAt: new Date(),
+                createdAt: new Date(),
                 description: "Customer",
                 email: "lgnvpr@gmail.com",
                 name: listName[i],
                 sex: data.randomSex(),
                 status: Status.active,
                 phoneNumber: data.randomPhone(),
-                updateAt : new Date()
+                updatedAt : new Date()
             }
             await MongoService._create(serviceName.customer, customer);
             listCustomer.push(customer)

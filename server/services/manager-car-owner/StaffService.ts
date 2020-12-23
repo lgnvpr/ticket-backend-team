@@ -17,14 +17,12 @@ import { SequelizeDbAdapterProps } from "server/base-service/sequelize/Sequelize
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.staff,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: false,
-	}),
+	adapter: new SqlAdapter(staffModelSequelize, [positionStaffModelSequelize]),
 	settings : {
 		// populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
 	},

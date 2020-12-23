@@ -11,43 +11,31 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
-import { ticketModelSequelize } from "server/model-sequelize/TicketModel copy";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import { resolveSync } from "tsconfig";
 import { PropsSummary } from "@Core/controller.ts/Statistical";
 import moment from "moment";
+import { started } from "@Applications/ApiGateway";
+import { carModelSequelize } from "server/model-sequelize/CarModel";
+import { tripModelSequelize } from "server/model-sequelize/TripModel";
+import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
+import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.ticket,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.ticket,
-		define: ticketModelSequelize,
-	},
+	adapter: new SqlAdapter(ticketModelSequelize, [
+		tripModelSequelize,
+		chairCarModelSequelize,
+		customerModelSequelize,
+	]),
 	dependencies: ["dbCustomSequelize"],
-	settings: {
-		populates: [
-			{ field: "trip", service: serviceName.car, filedGet: "positionId" },
-			{
-				field: "chairCar",
-				service: serviceName.car,
-				filedGet: "chairCarId",
-			},
-			{ field: "staff", service: serviceName.car, filedGet: "staffId" },
-			{
-				field: "customer",
-				service: serviceName.car,
-				filedGet: "customerId",
-			},
-		],
-	},
+
 	collection: serviceName.ticket,
 })
 class TicketService extends BaseServiceWithSequelize<Ticket> {
@@ -90,7 +78,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 			on trips.id = tickets."tripId" 
 			group by price 
 		`;
-		return this.adapter.db
+		return this.adapter
 			.query(sql)
 			.then(([[res]]) => parseInt(res["sum"]))
 			.catch((err) => 0);
@@ -98,8 +86,6 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 
 	@Action()
 	public async charRevenue(ctx: Context<any>) {
-
-
 		// let typeGet: any = this.getType(ctx.params.type);
 		// return this.adapter.collection.aggregate([
 		// 	{ $match: {} },
@@ -119,13 +105,17 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		// 		},
 		// 	},
 		// ]).toArray();
-		
-		const propsGetChart: PropsSummary= {
-			from : new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
-			to : new Date(moment(ctx.params.to || new Date()).format("YYYY-MM-DD")),
-			interval : ctx.params.interval||"day"
-		}
-		propsGetChart.to = new Date(propsGetChart.to.setDate(propsGetChart.to.getDate()+1)) 
+
+		const propsGetChart: PropsSummary = {
+			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			to: new Date(
+				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
+			),
+			interval: ctx.params.interval || "day",
+		};
+		propsGetChart.to = new Date(
+			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
+		);
 
 		const sql = `
 		select date_trunc(?, tickets."createdAt") as "time",sum(price) as "value" from tickets
@@ -134,10 +124,18 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
 		group by date_trunc('day', tickets."createdAt"),price 
 		`;
-		return this.adapter.db.query(sql, {replacements: [propsGetChart.interval, propsGetChart.from, propsGetChart.to]}).then(([res] : any)=>{
-			console.log(res);
-			return res
-		})
+		return this.adapter
+			.query(sql, {
+				replacements: [
+					propsGetChart.interval,
+					propsGetChart.from,
+					propsGetChart.to,
+				],
+			})
+			.then(([res]: any) => {
+				console.log(res);
+				return res;
+			});
 	}
 
 	@Action()
@@ -153,23 +151,34 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		// 	},
 		// ]);
 
-		const propsGetChart: PropsSummary= {
-			from : new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
-			to : new Date(moment(ctx.params.to || new Date()).format("YYYY-MM-DD")),
-			interval : ctx.params.interval||"day"
-		}
-		propsGetChart.to = new Date(propsGetChart.to.setDate(propsGetChart.to.getDate()+1)) 
+		const propsGetChart: PropsSummary = {
+			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			to: new Date(
+				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
+			),
+			interval: ctx.params.interval || "day",
+		};
+		propsGetChart.to = new Date(
+			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
+		);
 
 		const sql = `
 		select date_trunc(?, tickets."createdAt") as "time",count(*) as "value" from tickets
 		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
 		group by date_trunc('day', tickets."createdAt")
 		`;
-		return this.adapter.db.query(sql, {replacements: [propsGetChart.interval, propsGetChart.from, propsGetChart.to]}).then(([res] : any)=>{
-			console.log(res);
-			return res
-		})
-
+		return this.adapter
+			.query(sql, {
+				replacements: [
+					propsGetChart.interval,
+					propsGetChart.from,
+					propsGetChart.to,
+				],
+			})
+			.then(([res]: any) => {
+				console.log(res);
+				return res;
+			});
 	}
 
 	public getType(type: string): any {

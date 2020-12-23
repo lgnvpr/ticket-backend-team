@@ -1,0 +1,186 @@
+import { Car } from "@Core/base-carOwner/Car";
+import { PositionDefault } from "@Core/base-carOwner/PositionDefault";
+import { PositionStaff } from "@Core/base-carOwner/PositionStaff";
+
+export const dataCar: Car[] = [
+	{
+		name: "Ale 1",
+		licensePlates: "47A-42961",
+		entryAt: new Date("2020-08-31"),
+		origin: "Argentina",
+	},
+	{
+		name: "Ale 2",
+		licensePlates: "47A-50436",
+		entryAt: new Date("2020-01-06"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 3",
+		licensePlates: "47A-55301",
+		entryAt: new Date("2020-02-19"),
+		origin: "Brazil",
+	},
+	{
+		name: "Ale 4",
+		licensePlates: "47A-68428",
+		entryAt: new Date("2020-05-06"),
+		origin: "Russia",
+	},
+	{
+		name: "Ale 5",
+		licensePlates: "47A-58411",
+		entryAt: new Date("2020-08-02"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 6",
+		licensePlates: "47A-17478",
+		entryAt: new Date("2020-04-21"),
+		origin: "Russia",
+	},
+	{
+		name: "Ale 7",
+		licensePlates: "47A-63323",
+		entryAt: new Date("2020-09-20"),
+		origin: "Russia",
+	},
+	{
+		name: "Ale 8",
+		licensePlates: "47A-55289",
+		entryAt: new Date("2020-02-17"),
+		origin: "Vietnam",
+	},
+	{
+		name: "Ale 9",
+		licensePlates: "47A-51393",
+		entryAt: new Date("2020-12-16"),
+		origin: "China",
+	},
+	{
+		name: "Ale 10",
+		licensePlates: "47A-0781-",
+		entryAt: new Date("2020-07-23"),
+		origin: "China",
+	},
+	{
+		name: "Ale 11",
+		licensePlates: "47A-45963",
+		entryAt: new Date("2020-09-18"),
+		origin: "China",
+	},
+	{
+		name: "Ale 12",
+		licensePlates: "47A-59779",
+		entryAt: new Date("2020-03-20"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 13",
+		licensePlates: "47A-11344",
+		entryAt: new Date("2020-10-19"),
+		origin: "Poland",
+	},
+	{
+		name: "Ale 14",
+		licensePlates: "47A-0069-",
+		entryAt: new Date("2020-11-04"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 15",
+		licensePlates: "47A-0363-",
+		entryAt: new Date("2020-06-20"),
+		origin: "Russia",
+	},
+	{
+		name: "Ale 16",
+		licensePlates: "47A-55316",
+		entryAt: new Date("2020-08-29"),
+		origin: "United States",
+	},
+	{
+		name: "Ale 17",
+		licensePlates: "47A-68428",
+		entryAt: new Date("2020-06-02"),
+		origin: "Canada",
+	},
+	{
+		name: "Ale 18",
+		licensePlates: "47A-0268-",
+		entryAt: new Date("2020-05-13"),
+		origin: "Portugal",
+	},
+	{
+		name: "Ale 19",
+		licensePlates: "47A-0472-",
+		entryAt: new Date("2020-08-13"),
+		origin: "Mongolia",
+	},
+	{
+		name: "Ale 20",
+		licensePlates: "47A-0338-",
+		entryAt: new Date("2020-12-16"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 21",
+		licensePlates: "47A-36800",
+		entryAt: new Date("2020-03-20"),
+		origin: "Mauritius",
+	},
+	{
+		name: "Ale 22",
+		licensePlates: "47A-57955",
+		entryAt: new Date("2020-08-09"),
+		origin: "China",
+	},
+	{
+		name: "Ale 23",
+		licensePlates: "47A-60905",
+		entryAt: new Date("2020-09-08"),
+		origin: "China",
+	},
+	{
+		name: "Ale 24",
+		licensePlates: "47A-50201",
+		entryAt: new Date("2020-02-04"),
+		origin: "Indonesia",
+	},
+	{
+		name: "Ale 25",
+		licensePlates: "47A-60951",
+		entryAt: new Date("2020-06-22"),
+		origin: "Poland",
+	},
+	{
+		name: "Ale 26",
+		licensePlates: "47A-52125",
+		entryAt: new Date("2020-07-09"),
+		origin: "Albania",
+	},
+	{
+		name: "Ale 27",
+		licensePlates: "47A-0069-",
+		entryAt: new Date("2020-01-14"),
+		origin: "Spain",
+	},
+	{
+		name: "Ale 28",
+		licensePlates: "47A-0093-",
+		entryAt: new Date("2020-06-23"),
+		origin: "China",
+	},
+	{
+		name: "Ale 29",
+		licensePlates: "47A-48102",
+		entryAt: new Date("2020-07-21"),
+		origin: "Haiti",
+	},
+	{
+		name: "Ale 30",
+		licensePlates: "47A-59762",
+		entryAt: new Date("2020-11-12"),
+		origin: "Bulgaria",
+	},
+];

@@ -24,7 +24,7 @@ import { Account } from "@Core/base-carOwner/Account";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 import md5 from 'md5';
 import { Op } from "sequelize";
 
@@ -32,15 +32,8 @@ import { Op } from "sequelize";
 @Service({
 	name: serviceName.account,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.account,
-		define: accountModelModelSequelize,
-	},
+	adapter: new SqlAdapter(accountModelModelSequelize, [staffModelSequelize]),
 	dependencies: ["dbCustomSequelize"],
-
 	collection: serviceName.car,
 })
 class AccountService extends BaseServiceWithSequelize<Account> {
@@ -62,7 +55,7 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 	public async login(ctx: Context<{username: string , password : string}>) {
 		console.log("on login")
 		const params:any = ctx.params;
-		const checkExit=await this.adapter.model.findOne({
+		const checkExit:any=await this.adapter.modelDefine.findOne({
 			where: {
 				[Op.and] : [
 					{username: params.username},
@@ -70,6 +63,7 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 				]
 			}
 		})
+		
 		const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit.dataValues.staffId})
 		if(checkStaff){
 			return jwt.sign(checkStaff, "aleTeam")

@@ -67,7 +67,7 @@ const CustomService: any = {
 	},
 
 	methods: {
-		getRelations() {
+		getRelationsQuery() {
 			const relations = this.adapter.relations;
 			if (relations && relations.length > 0) {
 				const newRelations = relations.map((relation) => {
@@ -189,14 +189,19 @@ const CustomService: any = {
 						where: { id: params.id },
 					});
 					if (obj)
-						return {
+						var updateObj = {
 							...obj.dataValues,
 							...params,
 						};
+						console.log(updateObj)
+						return updateObj
 				}
+				
 			}
 			params.id = uuidv4();
-			return this.model.create(params);
+			const create = await this.model.create(params);
+			console.log(create)
+			return create;
 		},
 
 		async _sequelizeCreateMany(params) {
@@ -225,7 +230,7 @@ const CustomService: any = {
 
 		async _sequelizeList(params: IList) {
 			params = this.sanitizeParamsListSequelize(params);
-			const getRelations = this.getRelations();
+			const getRelations = this.getRelationsQuery();
 			var query = this.sanitizeParamsQuery(params)
 			var dataPaging = await this.adapter.model.findAndCountAll({
 				include: getRelations,

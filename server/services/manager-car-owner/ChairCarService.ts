@@ -13,21 +13,16 @@ import { IGet } from "@Core/query/IGet";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { carModelSequelize } from "server/model-sequelize/CarModel";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
-const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.chairCar,
 	mixins: [DBServiceCustom],
-	adapter: new SqlAdapter(config.URLPostgres, {
-		noSync: true,
-	}),
-	model: {
-		name: serviceName.chairCar,
-		define: chairCarModelSequelize,
-	},
+	adapter: new SqlAdapter(chairCarModelSequelize, []),
 	dependencies: ["dbCustomSequelize"],
 	settings: {
 		populates: [
@@ -62,7 +57,7 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 		where "carId" in (?)
 		group by chair_cars."carId" 
 		`
-		return this.adapter.db.query(sql, {replacements : [carIds]}).then(([res]: any)=>{
+		return this.adapter.query(sql, {replacements : [carIds]}).then(([res]: any)=>{
 			return res
 		})
 	}

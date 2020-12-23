@@ -15,7 +15,6 @@ const errorMessage =
 export class BaseService<T extends BaseModel>
   extends MoleculerService
   implements IBaseService<T> {
-
   async _find(ctx: Context, params: IFind): Promise<T[]> {
     throw Error(errorMessage);
   }

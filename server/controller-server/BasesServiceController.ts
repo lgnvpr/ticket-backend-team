@@ -24,7 +24,7 @@ export class BaseServiceController<T extends BaseModel> {
   async _list(ctx: Context, params: IList): Promise<Paging<T>> {
     return ctx.broker.call(`${this.serviceName}.list`, params);
   }
-  async _create(ctx: Context, t: T): Promise<T> {
+  async _create(ctx: Context, t: T|T[]): Promise<T|T[]> {
     return ctx.broker.call(`${this.serviceName}.create`, t);
   }
   async _insert(ctx: Context, params: T | T[]): Promise<T | T[]> {

@@ -54,7 +54,7 @@ const CustomService: any = {
 		},
 
 		insertMany(ctx: Context) {
-			return this._sequelizeCreateMany(ctx, ctx.params);
+			return this._sequelizeCreateMany(ctx.params);
 		},
 
 		// updateMany(ctx: Context) {
@@ -62,7 +62,7 @@ const CustomService: any = {
 		// },
 
 		find(ctx: Context) {
-			return this._sequelizeFind(ctx, ctx.params);
+			return this._sequelizeFind(ctx.params);
 		},
 		count(ctx: Context) {
 			return this._sequelizeCount(ctx.params);
@@ -114,13 +114,13 @@ const CustomService: any = {
 						.replace(/,/g, " ")
 						.split(" ");
 				}
-				params.search = params.searchFields.map((field) => {
+				params.querySearchSequelize = params.searchFields.map((field) => {
 					return {
 						[field]: { [Op.iLike]: `%${params.search || ""}%` },
 					};
 				}) as any;
 			} else {
-				params.search = null; // ! Hơi củ chuối
+				params.querySearchSequelize = null; // ! Hơi củ chuối
 			}
 			return params;
 		},
@@ -145,8 +145,8 @@ const CustomService: any = {
 		},
 		sanitizeParamsFindSequelize(params: IFind) {
 			if (typeof params.limit === "string")
-				params.limit = Number(params.limit) | 1;
-			if (!params.offset) params.offset = 1;
+				params.limit = Number(params.limit) || 1000;
+			if (!params.offset) params.offset = 0;
 
 			if (typeof params.query === "string")
 				params.query = JSON.parse(params.query);
@@ -161,9 +161,9 @@ const CustomService: any = {
 					{ status: Status.active },
 					{ status: Status.active },
 				],
-				[Op.or]: params.search,
+				[Op.or]: params.querySearchSequelize,
 			};
-			if (!params.search) {
+			if (!params.querySearchSequelize) {
 				query = {
 					[Op.and]: [params.query],
 					[Op.or]: [
@@ -287,9 +287,27 @@ const CustomService: any = {
 			return data;
 		},
 		async _sequelizeGet(params: any) {
-			const data = await this._sequelizeFind({
-				query: { id: params.id },
+			params.query = {
+				id : params.id
+			}
+			params = this.sanitizeParamsListSequelize(params);
+			var query = this.sanitizeParamsQuery(params)
+			const getRelations = this.getRelationsQuery();
+			var data = await this.adapter.model.findAll({
+				include: getRelations,
+				where: query,
+				limit: params.limit || null,
+				offset: params.offset || null,
+				order: params.sort,
 			});
+
+			data = data?.map((item) => {
+				if (item && item?.dataValues) {
+					return item.dataValues;
+				}
+				return item;
+			});
+
 			if (data.length == 0) return null;
 			if (data.length == 1) return data[0];
 			return data;

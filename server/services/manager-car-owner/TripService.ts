@@ -8,7 +8,7 @@ import { Ticket } from "@Core/base-carOwner/Ticket";
 import { Trip } from "@Core/base-carOwner/Trip";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
-import { IGetByDate } from "@Core/controller.ts/TripController";
+import { ListWithTripSale } from "@Core/controller.ts/TripController";
 import { Status } from "@Core/query/BaseModel";
 import { IFind } from "@Core/query/IFind";
 import { serviceName } from "@Core/query/NameService";
@@ -35,7 +35,7 @@ const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 })
 class TripService extends BaseServiceWithSequelize<Trip> {
 	@Action()
-	async getListByDate(ctx: Context<IGetByDate>) {
+	async getListByDate(ctx: Context<ListWithTripSale>) {
 		console.log(ctx.params)
 		var from = new Date(moment(ctx.params.from || new Date()).format("YYYY-MM-DD"))
 		var to = new Date(moment(ctx.params.to || new Date()).format("YYYY-MM-DD"));

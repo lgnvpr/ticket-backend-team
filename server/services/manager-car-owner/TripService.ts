@@ -28,7 +28,7 @@ const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	name: serviceName.trip,
 	adapter: new Adapter(tripModelSequelize, [carModelSequelize, routeModelSequelize]),
 	mixins: [DBServiceCustom],
-	dependencies: ["dbCustomSequelize"],
+	dependencies: ["dbCustomSequelize", serviceName.car, serviceName.route],
 	collection: serviceName.trip,
 })
 class TripService extends BaseServiceWithSequelize<Trip> {

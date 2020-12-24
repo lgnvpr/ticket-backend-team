@@ -33,7 +33,7 @@ import { Op } from "sequelize";
 	name: serviceName.account,
 	mixins: [DBServiceCustom],
 	adapter: new SqlAdapter(accountModelModelSequelize, [staffModelSequelize]),
-	dependencies: ["dbCustomSequelize"],
+	dependencies: ["dbCustomSequelize", serviceName.staff],
 	collection: serviceName.car,
 })
 class AccountService extends BaseServiceWithSequelize<Account> {

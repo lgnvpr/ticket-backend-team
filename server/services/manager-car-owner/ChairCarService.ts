@@ -23,7 +23,7 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	name: serviceName.chairCar,
 	mixins: [DBServiceCustom],
 	adapter: new SqlAdapter(chairCarModelSequelize, []),
-	dependencies: ["dbCustomSequelize"],
+	dependencies: ["dbCustomSequelize", serviceName.car],
 	settings: {
 		populates: [
 			{ field: "car", service: serviceName.car, filedGet: "carId" },

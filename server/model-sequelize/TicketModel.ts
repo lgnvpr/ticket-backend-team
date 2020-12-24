@@ -21,6 +21,8 @@ export const ticketModelSequelize = sequelizeConnect.define<Instance>(serviceNam
 	statusTicket: { type: DataTypes.STRING(20), allowNull: true },
 	tripId: { type: DataTypes.UUID, allowNull: true },
 });
+
+ticketModelSequelize.sync()
 ticketModelSequelize.belongsTo(tripModelSequelize, {
 	foreignKey : "tripId"
 })

@@ -34,7 +34,7 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 		chairCarModelSequelize,
 		customerModelSequelize,
 	]),
-	dependencies: ["dbCustomSequelize"],
+	dependencies: ["dbCustomSequelize", serviceName.customer, serviceName.chairCar, serviceName.trip],
 
 	collection: serviceName.ticket,
 })

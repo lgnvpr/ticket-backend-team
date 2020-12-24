@@ -27,7 +27,7 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 		// populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
 	},
 
-	dependencies: ["dbCustomSequelize"],
+	dependencies: ["dbCustomSequelize", serviceName.position],
 	// collection: serviceName.staff,
 })
 class StaffService extends BaseServiceWithSequelize<Staff> {

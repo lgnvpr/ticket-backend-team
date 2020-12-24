@@ -35,20 +35,21 @@ class CarService extends BaseServiceWithSequelize<Car> {
 	
 	@Action()
 	public async list(ctx: Context<IList>) {
+		
 		var listCar: Paging<Car> = await this._sequelizeList(ctx.params);
 		const carIds = listCar.rows.map((car) => car.id);
-		// const countCharOfCar: {
-		// 	carId: string;
-		// 	count: number;
-		// }[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
+		const countCharOfCar: {
+			carId: string;
+			count: number;
+		}[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
 
-		// listCar.rows=  listCar.rows.map((car) => {
-		// 	const getTotalChair = countCharOfCar.find(
-		// 		(count) => count.carId == car.id
-		// 	);
-		// 	car.totalChair = getTotalChair?.count;
-		// 	return car;
-		// });
+		listCar.rows=  listCar.rows.map((car) => {
+			const getTotalChair = countCharOfCar.find(
+				(count) => count.carId == car.id
+			);
+			car.totalChair = getTotalChair?.count;
+			return car;
+		});
 		return listCar;
 	}
 }

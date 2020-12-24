@@ -26,19 +26,7 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	settings : {
 		// populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
 	},
-	model: {
-		name: serviceName.staff,
-		define: staffModelSequelize,
-	},
-	relations :[
-		{
-			name :serviceName.position,
-			type : "belongsTo",
-			option : {},
-			model : positionStaffModelSequelize,
-			relationOptions : {foreignKey : "positionId"}
-		}
-	],
+
 	dependencies: ["dbCustomSequelize"],
 	// collection: serviceName.staff,
 })

@@ -46,7 +46,7 @@ const ApiService: ServiceSchema = {
 		},
 		routes: [
 			{
-				authentication: false,
+				authentication: true,
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
 					ctx.broker.cacher.clean();
@@ -96,7 +96,7 @@ const ApiService: ServiceSchema = {
 					"GET statistics/IntervalTicket": `${serviceName.statistics}.IntervalTicket`,
 					"GET statistics/StatisticalSummary": `${serviceName.statistics}.StatisticalSummary`,
 
-					"GET getMe" : `${serviceName.account}.getMe`
+					"GET account/getMe" : `${serviceName.account}.getMe`
 				},
 			},
 			{
@@ -108,7 +108,7 @@ const ApiService: ServiceSchema = {
 					ctx.broker.cacher.clean();
 				},
 				aliases: {
-					"GET login": `${serviceName.account}.login`,
+					"GET account/login": `${serviceName.account}.login`,
 				},
 			},
 		],

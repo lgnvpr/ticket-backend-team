@@ -31,3 +31,5 @@ ticketModelSequelize.belongsTo(customerModelSequelize, {
 	foreignKey : "customerId"	
 })
 
+
+

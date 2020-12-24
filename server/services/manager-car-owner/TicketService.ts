@@ -78,7 +78,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 			on trips.id = tickets."tripId" 
 			group by price 
 		`;
-		return this.adapter
+		return this.adapter.db
 			.query(sql)
 			.then(([[res]]) => parseInt(res["sum"]))
 			.catch((err) => 0);
@@ -125,7 +125,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		group by date_trunc('day', tickets."createdAt"),price 
 		`;
 		return this.adapter
-			.query(sql, {
+		.db.query(sql, {
 				replacements: [
 					propsGetChart.interval,
 					propsGetChart.from,
@@ -167,7 +167,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
 		group by date_trunc('day', tickets."createdAt")
 		`;
-		return this.adapter
+		return this.adapter.db
 			.query(sql, {
 				replacements: [
 					propsGetChart.interval,

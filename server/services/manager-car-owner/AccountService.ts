@@ -53,9 +53,8 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 
 	@Action()
 	public async login(ctx: Context<{username: string , password : string}>) {
-		console.log("on login")
 		const params:any = ctx.params;
-		const checkExit:any=await this.adapter.modelDefine.findOne({
+		const checkExit:any=await this.adapter.model.findOne({
 			where: {
 				[Op.and] : [
 					{username: params.username},
@@ -63,10 +62,13 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 				]
 			}
 		})
-		
-		const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit.dataValues.staffId})
+		console.log(checkExit)
+		const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit?.dataValues?.staffId})
 		if(checkStaff){
-			return jwt.sign(checkStaff, "aleTeam")
+			return {
+				token : jwt.sign(checkStaff, "aleTeam"),
+				account :checkStaff 
+			}
 		}
 		throw new Error("Tên tài khoản hoặc mật khẩu không đúng");
 	}

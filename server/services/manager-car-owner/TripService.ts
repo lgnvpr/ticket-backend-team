@@ -9,11 +9,13 @@ import { Trip } from "@Core/base-carOwner/Trip";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
 import { IGetByDate } from "@Core/controller.ts/TripController";
+import { Status } from "@Core/query/BaseModel";
 import { IFind } from "@Core/query/IFind";
 import { serviceName } from "@Core/query/NameService";
 import { Context } from "moleculer";
 import { Action, Service } from "moleculer-decorators";
-import { Op } from "sequelize";
+import moment from "moment";
+import { Op, where } from "sequelize";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { routeModelSequelize } from "server/model-sequelize/RouteModel";
@@ -32,27 +34,13 @@ const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 class TripService extends BaseServiceWithSequelize<Trip> {
 	@Action()
 	getListByDate(ctx: Context<IGetByDate>) {
-		var query: IGetByDate = {
-			from: new Date(ctx.params.from || new Date()),
-			to: new Date(ctx.params.to || new Date()),
-		};
-		query = {
-			from : new Date(new Date(query.from).setDate(query.from.getDate())),
-			to : new Date(new Date(query.to).setDate(query.to.getDate()+1)),
+		var from = new Date(moment(ctx.params.from || new Date()).format("YYYY-MM-DD"))
+		var to = new Date(moment(ctx.params.to || new Date()).format("YYYY-MM-DD"));
+		var query = {
+			
 		}
-		return this.adapter.model.findAndCountAll({
-			where : {
-				[Op.and]: [
-					{}
-				]
-			},
-			limit : 10,
-			offset : 0 
-		}).then(res=>{
-			 (res)
-			return res
-		})
-		
+
+	
 	}
 
 	@Action()
@@ -119,14 +107,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 	} as DiagramChairOfTrip
 	}
 
-	formatDate(date: Date) : Date{
-		var getDate: Date =new Date();
-		getDate.setHours(0);
-		getDate.setMinutes(0);
-		getDate.setSeconds(0);
-		getDate.setMilliseconds(0);
-		return getDate;
-	}
+	
 	
 }
 

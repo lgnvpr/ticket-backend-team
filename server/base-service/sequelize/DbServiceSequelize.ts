@@ -39,6 +39,9 @@ const CustomService: any = {
 		useDotNotation: false,
 	},
 	actions: {
+		get(ctx: Context){
+			return this._sequelizeGet(ctx.params)
+		},
 		list(ctx: Context) {
 			return this._sequelizeList(ctx.params);
 		},
@@ -85,6 +88,9 @@ const CustomService: any = {
 			return [];
 		},
 		sanitizeParamsBaseListPropsSequelize(params) {
+			if(!params.sort){
+				params.sort = "-createdAt"
+			}
 			if (params.sort) {
 				// add sort by created
 				if (typeof params.sort === "string") {
@@ -170,6 +176,7 @@ const CustomService: any = {
 		} ,
 
 		async _sequelizeCreate(params) {
+			params.updatedAt = new Date();
 			if (Array.isArray(params)) {
 				params = params.map((item) => {
 					item.updatedAt = new Date();
@@ -198,9 +205,10 @@ const CustomService: any = {
 				}
 				
 			}
-			params.id = uuidv4();
-			const create = await this.model.create(params);
-			console.log(create)
+			if(!params.id){
+				params.id = uuidv4()
+			}
+			const create = await this.adapter.model.create(params);
 			return create;
 		},
 
@@ -276,6 +284,14 @@ const CustomService: any = {
 				}
 				return item;
 			});
+			return data;
+		},
+		async _sequelizeGet(params: any) {
+			const data = await this._sequelizeFind({
+				query: { id: params.id },
+			});
+			if (data.length == 0) return null;
+			if (data.length == 1) return data[0];
 			return data;
 		},
 	},

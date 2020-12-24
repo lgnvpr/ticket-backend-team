@@ -57,7 +57,7 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 		where "carId" in (?)
 		group by chair_cars."carId" 
 		`
-		return this.adapter.query(sql, {replacements : [carIds]}).then(([res]: any)=>{
+		return this.adapter.db.query(sql, {replacements : [carIds]}).then(([res]: any)=>{
 			return res
 		})
 	}

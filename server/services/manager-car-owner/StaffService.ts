@@ -50,6 +50,7 @@ class StaffService extends BaseServiceCustom<Staff> {
 
 	@Action()
 	public find(ctx: Context<IFind> ){
+		console.log(ctx.params)
 		return this._customFind(ctx, ctx.params)
 	}
 }

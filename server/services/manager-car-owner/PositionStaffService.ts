@@ -27,6 +27,11 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.position,
 })
 class PositionStaffService extends BaseServiceWithSequelize<PositionStaff> {
+	@Action()
+	public list(ctx: Context<IList>) {
+		ctx.params.searchFields = ["name","description"];
+		return  this._sequelizeList(ctx.params)
+	}
 	// @Action()
 	// public async create(ctx: Context<PositionStaff>) {
 	// 	if (ctx.params._id) {

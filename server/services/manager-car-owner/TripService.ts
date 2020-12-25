@@ -102,7 +102,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 		} as IFind);
 
 		const customerIds = getTicket.map(ticket => ticket.customerId); 
-		const getCustomer: Customer[] = await ctx.call(`${serviceName.customer}.get` ,{id : customerIds});
+		const getCustomer: Customer[] = await ctx.call(`${serviceName.customer}.find` ,{id : customerIds});
 		getTicket = getTicket.map(ticket =>{
 			ticket.customer = getCustomer.find(customer =>  customer.id == ticket.customerId)  
 			return ticket

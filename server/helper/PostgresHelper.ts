@@ -7,9 +7,33 @@ export class PostgresHelper {
 		adapter: SequelizeDbAdapterProps<any>,
 		sql: string,
 		prestatement: any,
-		paramsList: IList
+		paramsList: IList,
+		otherQuery ?: string
 	): Promise<Paging<T>> {
+		if(!otherQuery) otherQuery = "and (1=1)"  
 		console.log(paramsList)
+		var querySort : string = "order by "
+		if(!paramsList.sort){
+			paramsList.sort = "-createdAt"
+		}
+		if (paramsList.sort) {
+			// add sort by created
+			if (typeof paramsList.sort === "string") {
+				paramsList.sort = paramsList.sort.replace(/,/g, " ").split(" ");
+			}
+			paramsList.sort.map((sortItem, index) => {
+				const typeSort =
+					sortItem.substring(0, 1) === "-" ? "DESC" : "ASC";
+				const getName =
+					sortItem.substring(0, 1) === "-"
+						? sortItem.substring(1, sortItem.length)
+						: sortItem;
+				querySort += `queryPaging."${getName}" ${typeSort} ${(index ===paramsList.sort.length-1) ? "" :","}`
+				return [getName, typeSort];
+			}) as any; 
+		} 
+
+
     var querySearch = "where 1=1";
     if(paramsList.searchFields &&
 			Array.isArray(paramsList.searchFields) &&
@@ -26,8 +50,11 @@ export class PostgresHelper {
 		) {
 			querySearch = "where";
 			for (let i = 0; i < paramsList.searchFields.length; i++) {
-				if (i == 0) {
-					querySearch += ` queryPaging."${paramsList.searchFields[i]}"::text ilike '%' || '${paramsList.search || ""}' || '%' `;
+				if (i == paramsList.searchFields.length -1) {
+					querySearch += `or queryPaging."${paramsList.searchFields[i]}"::text ilike '%' || '${paramsList.search || ""}' || '%' )`;
+				}
+				else if (i == 0) {
+					querySearch += ` (queryPaging."${paramsList.searchFields[i]}"::text ilike '%' || '${paramsList.search || ""}' || '%' `;
 				} else {
 					querySearch += `  or queryPaging."${paramsList.searchFields[i]}"::text ilike '%' || '${paramsList.search || ""}' ||'%'  `;
 				}
@@ -35,8 +62,10 @@ export class PostgresHelper {
 		}
 		const queryPaging = ` limit ${paramsList.pageSize || 10} offset ${(paramsList.page - 1) * paramsList.pageSize || 0} `;
 		const newSql = `select * from ( ${sql} ) as queryPaging  
-      ${querySearch}  
-      ${queryPaging} 
+	  ${querySearch}  
+	  ${otherQuery}
+	  ${querySort}
+	  ${queryPaging}  
     `;
 		const queryCount = `select count(*) from (${sql}) as queryPaging  ${querySearch}`;
 		const data: any = adapter.db

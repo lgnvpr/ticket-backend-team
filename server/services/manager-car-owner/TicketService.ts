@@ -11,128 +11,174 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { resolveSync } from "tsconfig";
+import { PropsSummary } from "@Core/controller.ts/Statistical";
+import moment from "moment";
+import { started } from "@Applications/ApiGateway";
+import { carModelSequelize } from "server/model-sequelize/CarModel";
+import { tripModelSequelize } from "server/model-sequelize/TripModel";
+import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
+import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.ticket,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
-	settings: {
-		populates: [
-			{ field: "trip", service: serviceName.car, filedGet: "positionId" },
-			{
-				field: "chairCar",
-				service: serviceName.car,
-				filedGet: "chairCarId",
-			},
-			{ field: "staff", service: serviceName.car, filedGet: "staffId" },
-			{
-				field: "customer",
-				service: serviceName.car,
-				filedGet: "customerId",
-			},
-		],
-	},
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(ticketModelSequelize, [
+		tripModelSequelize,
+		chairCarModelSequelize,
+		customerModelSequelize,
+	]),
+	dependencies: ["dbCustomSequelize", serviceName.customer, serviceName.chairCar, serviceName.trip],
+
 	collection: serviceName.ticket,
 })
-class TicketService extends BaseServiceCustom<Ticket> {
+class TicketService extends BaseServiceWithSequelize<Ticket> {
 	@Action()
 	public async create(ctx: Context<Ticket>) {
 		let params: any = ctx.params;
 		let ticket: Ticket = params;
-		if (
-			!ticket ||
-			!ticket.metaMapping.customer.name ||
-			!ticket.metaMapping.customer.phoneNumber
-		)
+		if (!ticket || !ticket.customer.name || !ticket.customer.phoneNumber)
 			throw new Error("Không được để trống thông tin khách hàng");
-		let getCustomer = ticket.metaMapping.customer;
+		let getCustomer = ticket.customer;
 		if (getCustomer)
 			getCustomer = await ctx.call(
 				`${serviceName.customer}.create`,
 				getCustomer
 			);
-		ticket.customerId = getCustomer._id.toString();
-		return this._customCreate(ctx, ticket);
-	}
-	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
+		ticket.customerId = getCustomer.id.toString();
+		return this._sequelizeCreate(ticket);
 	}
 
 	@Action()
-	public remove(ctx: Context<{ id: string }>) {
-		return this._customRemove(ctx, ctx.params);
-	}
-
-	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
-	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind>) {
-		return this._customFind(ctx, ctx.params);
-	}
-
-	@Action()
-	public totalRevenue(ctx: Context) {
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$lookup: {
-					from: "trip",
-					localField: "tripId",
-					foreignField: "_id",
-					as: "trip",
-				},
-			},
-			{ $unwind: "$Trip" },
-			{ $group: { _id: "trip", totalRevenue: { $sum: "$trip.price" } } },
-		]);
+	public async totalRevenue(ctx: Context) {
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$lookup: {
+		// 			from: "trip",
+		// 			localField: "tripId",
+		// 			foreignField: "_id",
+		// 			as: "trip",
+		// 		},
+		// 	},
+		// 	{ $unwind: "$trip" },
+		// 	{ $group: { _id: "trip", totalRevenue: { $sum: "$trip.price" } } },
+		// ]).toArray().then(([res])=>{
+		// 	return res.totalRevenue
+		// })
+		const sql = `
+			select sum(price) from tickets
+			join trips 
+			on trips.id = tickets."tripId" 
+			group by price 
+		`;
+		return this.adapter.db
+			.query(sql)
+			.then(([[res]]) => parseInt(res["sum"]))
+			.catch((err) => 0);
 	}
 
 	@Action()
 	public async charRevenue(ctx: Context<any>) {
-		let typeGet: any = this.getType(ctx.params.type);
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$lookup: {
-					from: "Trip",
-					localField: "tripId",
-					foreignField: "_id",
-					as: "Trip",
-				},
-			},
-			{ $unwind: "$Trip" },
-			{
-				$group: {
-					_id: typeGet,
-					data: { $sum: "$Trip.price" },
-				},
-			},
-		]);
+		// let typeGet: any = this.getType(ctx.params.type);
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$lookup: {
+		// 			from: "trip",
+		// 			localField: "tripId",
+		// 			foreignField: "_id",
+		// 			as: "Trip",
+		// 		},
+		// 	},
+		// 	{ $unwind: "$Trip" },
+		// 	{
+		// 		$group: {
+		// 			_id: typeGet,
+		// 			data: { $sum: "$Trip.price" },
+		// 		},
+		// 	},
+		// ]).toArray();
+
+		const propsGetChart: PropsSummary = {
+			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			to: new Date(
+				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
+			),
+			interval: ctx.params.interval || "day",
+		};
+		propsGetChart.to = new Date(
+			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
+		);
+
+		const sql = `
+		select date_trunc(?, tickets."createdAt") as "time",sum(price) as "value" from tickets
+		join trips 
+		on trips.id = tickets."tripId" 
+		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
+		group by date_trunc('day', tickets."createdAt"),price 
+		`;
+		return this.adapter
+		.db.query(sql, {
+				replacements: [
+					propsGetChart.interval,
+					propsGetChart.from,
+					propsGetChart.to,
+				],
+			})
+			.then(([res]: any) => {
+				console.log(res);
+				return res;
+			});
 	}
 
 	@Action()
 	public async charTicket(ctx: Context<any>) {
 		let typeGet: any = this.getType(ctx.params.type);
-		return this.adapter.collection.aggregate([
-			{ $match: {} },
-			{
-				$group: {
-					_id: typeGet,
-					data: { $sum: 1 },
-				},
-			},
-		]);
+		// return this.adapter.collection.aggregate([
+		// 	{ $match: {} },
+		// 	{
+		// 		$group: {
+		// 			_id: typeGet,
+		// 			data: { $sum: 1 },
+		// 		},
+		// 	},
+		// ]);
+
+		const propsGetChart: PropsSummary = {
+			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			to: new Date(
+				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
+			),
+			interval: ctx.params.interval || "day",
+		};
+		propsGetChart.to = new Date(
+			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
+		);
+
+		const sql = `
+		select date_trunc(?, tickets."createdAt") as "time",count(*) as "value" from tickets
+		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
+		group by date_trunc('day', tickets."createdAt")
+		`;
+		return this.adapter.db
+			.query(sql, {
+				replacements: [
+					propsGetChart.interval,
+					propsGetChart.from,
+					propsGetChart.to,
+				],
+			})
+			.then(([res]: any) => {
+				console.log(res);
+				return res;
+			});
 	}
 
 	public getType(type: string): any {

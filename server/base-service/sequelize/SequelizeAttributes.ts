@@ -1,4 +1,5 @@
-import { DataTypeAbstract, ModelAttributeColumnOptions } from "sequelize";
+import { BaseModel } from "@Core/query/BaseModel";
+import { DataTypeAbstract, Model, ModelAttributeColumnOptions, ModelDefined, Optional, Sequelize } from "sequelize";
 
 type SequelizeAttribute =
   | string
@@ -8,3 +9,5 @@ type SequelizeAttribute =
 export type SequelizeAttributes<T extends { [key: string]: any }> = {
   [P in keyof T]: SequelizeAttribute;
 };
+
+

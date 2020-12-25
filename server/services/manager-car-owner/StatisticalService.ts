@@ -12,59 +12,129 @@ import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { DateHelper } from "server/helper/DateHelper";
-import { ChartDay, Statistical } from "@Core/controller.ts/Statistical";
+import { IntervalTicketChart, Summary } from "@Core/controller.ts/Statistical";
+import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import moment from "moment";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 @Service({
-	name: serviceName.car,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
-	collection: serviceName.car,
+	name: serviceName.statistics,
+	mixins: [DBServiceCustom],
+	dependencies: ["dbCustomSequelize"],
+	collection: serviceName.statistics,
 })
-class StatisticalService extends BaseServiceCustom<Car> {
-	async Statistical(ctx: Context<any>) {
-		var statistic: Statistical = {
+class StatisticalService extends BaseServiceWithSequelize<Car> {
+	@Action()
+	async IntervalTicket(ctx: Context<any>) {
+		const data = this.exportDataChar(
+			await ctx.call(`${serviceName.ticket}.charTicket`, {
+				from: ctx.params.from,
+				to: ctx.params.to,
+				interval: ctx.params.interval,
+			}),
+			"day", ctx.params.from , ctx.params.to
+		);
+		return data;
+	}
+
+	@Action()
+	async IntervalRevenue(ctx: Context<any>) {
+		return this.exportDataChar(
+			await ctx.call(`${serviceName.ticket}.charRevenue`, {
+				from: ctx.params.from,
+				to: ctx.params.to,
+				interval: ctx.params.interval,
+			}),
+			"day", ctx.params.from , ctx.params.to
+		);
+	}
+
+	@Action()
+	async StatisticalSummary(ctx: Context<any>) {
+		var statistic: Summary = {
 			totalCustomer: await ctx.call(`${serviceName.customer}.count`),
 			totalRevenue: await ctx.call(`${serviceName.ticket}.totalRevenue`),
 			totalTicket: await ctx.call(`${serviceName.ticket}.count`),
 			totalTrip: await ctx.call(`${serviceName.trip}.count`),
-			charTicket: this.exportDataChar(
-				await ctx.call(`${serviceName.ticket}.charTicket`, {
-					type: ctx.params.type,
-				})
-			),
-			charRevenue: this.exportDataChar(
-				await ctx.call(`${serviceName.ticket}.charRevenue`, {
-					type: ctx.params.type,
-				})
-			),
 		};
 		return statistic;
 	}
 
-	private exportDataChar(data: any, numberLoop: number = 7): any {
-		let newData: ChartDay[] = data.map((dataChar) => {
-			let date: Date = new Date(
-				`${dataChar._id.year}/${dataChar._id.month}/${dataChar._id.day}`
-			);
-			date = DateHelper.removeToDDMMYYY(date);
-			dataChar.day = date;
-			delete dataChar._id;
-			return dataChar;
+	private exportDataChar(
+		data: { time: Date; value: number }[],
+		interval: "day" | "month", from , to
+	): IntervalTicketChart[] {
+		data = data.map((item) => {
+			return {
+				time: new Date(item.time),
+				value: parseInt(item.value.toString()),
+			};
 		});
-		let returnData: ChartDay[] = [];
-		for (let i = 0; i < numberLoop; i++) {
-			let dateNeedRender: Date = DateHelper.removeToDDMMYYY(new Date());
-			dateNeedRender.setDate(dateNeedRender.getDate() - i);
-			let getData = newData.find(
-				(dataItem) =>
-					dataItem.day.getTime() === dateNeedRender.getTime()
-			);
-			returnData.push(getData || { data: 0, day: dateNeedRender });
+		const dates = data.map((item) => {
+			return item.time;
+		});
+		var maxDate = this.findMaxDate(dates);
+		var minDate = this.findMinDate(dates);
+		if(from){
+			minDate = new Date(moment(from).format("YYYY-MM-DD"))
 		}
-		return returnData.reverse();
+		if(to){
+			maxDate =new Date(moment(to).format("YYYY-MM-DD"))
+		}
+		
+		
+		const getRange = maxDate.getTime() - minDate.getTime();
+		if (interval == "month") {
+			return "Tao chưa viết cho tháng , truyền ngày hộ phát .......ok" as any;
+		} else {
+			return this.renderChartByDate(data, getRange, minDate, maxDate);
+		}
 		//tìm theo ngày
+	}
+	private renderChartByDate(
+		data: { time: Date; value: number }[],
+		range: number,
+		minDate: Date,
+		maxDate: Date
+	): IntervalTicketChart[] {
+		const calcRange = range / (1000 * 60 * 60 * 24) + 1;
+
+		var dataReturn: IntervalTicketChart[] = [];
+		for (let i = 0; i < calcRange; i++) {
+			const saveDate = new Date(minDate);
+			const dateCheck = new Date(
+				saveDate.setDate(saveDate.getDate() + i)
+			);
+			const dataCheck = data.find((item) => {
+				return item.time.getTime() == dateCheck.getTime();
+			});
+			dataReturn.push({
+				data: dataCheck?.value || 0,
+				day: dateCheck,
+			});
+		}
+		return dataReturn;
+	}
+
+	private findMinDate(time: Date[]): Date {
+		return time.reduce((pre, next) => {
+			if (pre.getTime() > next.getTime()) {
+				return next;
+			}
+			return pre;
+		}, time[0]);
+	}
+	private findMaxDate(time: Date[]): Date {
+		return time.reduce((pre, next) => {
+			if (pre.getTime() < next.getTime()) {
+				return next;
+			}
+			return pre;
+		}, time[0]);
 	}
 }
 

@@ -10,49 +10,45 @@ import { IList } from "server/base-ticket-team/query/IList";
 import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { IGet } from "@Core/query/IGet";
+import { staffModelSequelize } from "server/model-sequelize/StaffModel";
+import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { positionStaffModelSequelize } from "server/model-sequelize/PositionStaffModel";
+import { SequelizeDbAdapterProps } from "server/base-service/sequelize/SequelizeDbAdapter";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
+const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
+const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 
 @Service({
 	name: serviceName.staff,
-	mixins: [DbService],
-	adapter: new MongoDBAdapter(config.URLDb),
+	mixins: [DBServiceCustom],
+	adapter: new SqlAdapter(staffModelSequelize, [positionStaffModelSequelize]),
 	settings : {
-		populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
+		// populates: [{ field: "position", service: serviceName.position, filedGet : "positionId" }],
 	},
-	collection: serviceName.staff,
+
+	dependencies: ["dbCustomSequelize", serviceName.position],
+	// collection: serviceName.staff,
 })
-class StaffService extends BaseServiceCustom<Staff> {
-	@Action()
-	public create(ctx: Context<Staff>) {
-		return this._customCreate(ctx, ctx.params);
-	}
-	@Action()
-	public list(ctx: Context) {
-		return this._customList(ctx, ctx.params as IList);
-	}
+class StaffService extends BaseServiceWithSequelize<Staff> {
 
 	@Action()
-	public remove(ctx: Context<{id: string}>) {
-		return this._customRemove(ctx, ctx.params);
+	create(ctx: Context<Staff>){
+		return this._sequelizeCreate({
+			...ctx.params,
+			birthAt : new Date(ctx.params.birthAt || new Date()),
+		});
 	}
-
 	@Action()
-	public count(ctx: Context) {
-		return this._count(ctx, ctx.params);
+	list(ctx: Context<IList>){
+		const get = this.adapter.relations
+		console.log(get)
+		return this._sequelizeList({
+			...ctx.params,
+			searchFields : ["name", "identityCard", "address", "phoneNumber", "sex"]
+		})
 	}
-
-	@Action()
-	public get(ctx: Context<IGet>) {
-		
-		return this._customGet(ctx, ctx.params);
-	}
-
-	@Action()
-	public find(ctx: Context<IFind> ){
-		console.log(ctx.params)
-		return this._customFind(ctx, ctx.params)
-	}
+	
 }
 
 module.exports = StaffService;

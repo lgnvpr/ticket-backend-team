@@ -105,6 +105,8 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 			})
 			console.log("chaircarfind", chairCarFind)
 			for (let i = 0; i < chairTicket.length; i++) {
+				let date = new Date();
+				date.setDate(date.getDate()- Math.floor(Math.random()*30))
 				const customerTicket = customerFind[Math.floor(Math.random()*((await positionFind).length-1))]
 				let date = new Date();
 			date.setDate(date.getDate()+ Math.floor(Math.random()*30))

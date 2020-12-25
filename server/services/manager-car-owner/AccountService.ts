@@ -67,7 +67,7 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 		if(checkStaff){
 			return {
 				token : jwt.sign(checkStaff, "aleTeam"),
-				account :checkStaff 
+				auth :checkStaff 
 			}
 		}
 		throw new Error("Tên tài khoản hoặc mật khẩu không đúng");

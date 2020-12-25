@@ -9,12 +9,13 @@ export class PostgresHelper {
 		prestatement: any,
 		paramsList: IList
 	): Promise<Paging<T>> {
+		console.log(paramsList)
     var querySearch = "where 1=1";
     if(paramsList.searchFields &&
 			Array.isArray(paramsList.searchFields) &&
 			paramsList.searchFields.length > 0){
       paramsList.searchFields = paramsList.searchFields.map(field=>{
-        return _.snakeCase(field);
+        return field
       })
     }
     console.log(paramsList.searchFields)

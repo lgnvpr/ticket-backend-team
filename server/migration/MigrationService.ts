@@ -106,6 +106,8 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 			console.log("chaircarfind", chairCarFind)
 			for (let i = 0; i < chairTicket.length; i++) {
 				const customerTicket = customerFind[Math.floor(Math.random()*((await positionFind).length-1))]
+				let date = new Date();
+			date.setDate(date.getDate()+ Math.floor(Math.random()*30))
 				await ticketControllerServer._create(ctx, {
 					chairCarId : chairTicket[i].id,
 					customerId : customerTicket.id,
@@ -113,7 +115,8 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 					localPickup : routerTicket.localStart,
 					description : "",
 					tripId : tripTicket.id,
-					customer : customerTicket
+					customer : customerTicket,
+					createdAt : date
 				})	
 			}
 		}

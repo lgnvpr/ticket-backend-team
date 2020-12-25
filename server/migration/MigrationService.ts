@@ -90,6 +90,20 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 				timeStart : new Date(date),
 				price : Math.floor(Math.random()*200 +100)*1000,
 			})
+			await tripControllerServer._create(ctx, {
+				carId : item.id,
+				driveId : staffFind[Math.floor(Math.random()*((await positionFind).length-1))].id,
+				routeId : routeFind[Math.floor(Math.random()*((await positionFind).length-1))].id,
+				timeStart : new Date(date),
+				price : Math.floor(Math.random()*200 +100)*1000,
+			})
+			await tripControllerServer._create(ctx, {
+				carId : item.id,
+				driveId : staffFind[Math.floor(Math.random()*((await positionFind).length-1))].id,
+				routeId : routeFind[Math.floor(Math.random()*((await positionFind).length-1))].id,
+				timeStart : new Date(date),
+				price : Math.floor(Math.random()*200 +100)*1000,
+			})
 		}
 
 		const tripFind: Trip[] = await tripControllerServer._find(ctx, {})
@@ -108,7 +122,6 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 				let date = new Date();
 				date.setDate(date.getDate()- Math.floor(Math.random()*30))
 				const customerTicket = customerFind[Math.floor(Math.random()*((await positionFind).length-1))]
-				let date = new Date();
 			date.setDate(date.getDate()+ Math.floor(Math.random()*30))
 				await ticketControllerServer._create(ctx, {
 					chairCarId : chairTicket[i].id,

@@ -108,6 +108,8 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 				let date = new Date();
 				date.setDate(date.getDate()- Math.floor(Math.random()*30))
 				const customerTicket = customerFind[Math.floor(Math.random()*((await positionFind).length-1))]
+				let date = new Date();
+			date.setDate(date.getDate()+ Math.floor(Math.random()*30))
 				await ticketControllerServer._create(ctx, {
 					chairCarId : chairTicket[i].id,
 					customerId : customerTicket.id,

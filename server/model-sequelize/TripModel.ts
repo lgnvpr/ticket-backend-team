@@ -15,7 +15,7 @@ interface Instance extends Model<Trip, Optional<Trip, "id">>, Trip {}
 export const tripModelSequelize = sequelizeConnect.define<Instance>(serviceName.trip, {
 	...baseModelSequelize,
 	carId: { type: DataTypes.UUID, allowNull: true },
-	driveId: { type: DataTypes.UUID, allowNull: true },
+	driverId: { type: DataTypes.UUID, allowNull: true },
 	price: { type: DataTypes.INTEGER, allowNull: true },
 	routeId: { type: DataTypes.UUID, allowNull: true },
 	timeStart: { type: DataTypes.DATE, allowNull: true },
@@ -29,9 +29,10 @@ tripModelSequelize.belongsTo(routeModelSequelize, {
 	foreignKey : "routeId"
 })
 
-// tripModelSequelize.belongsTo(staffModelSequelize, {
-// 	foreignKey : "driverId"
-// })
+tripModelSequelize.belongsTo(staffModelSequelize, {
+	foreignKey : "driverId",
+	as : "drive"
+})
 
 
 

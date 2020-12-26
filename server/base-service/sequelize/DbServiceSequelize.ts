@@ -14,28 +14,13 @@ const CustomService: any = {
 	name: "dbCustomSequelize",
 	mixins: [DbService],
 	settings: {
-		/** @type {String} Name of ID field. */
 		idField: "id",
-
-		/** @type {Array<String>?} Field filtering list. It must be an `Array`. If the value is `null` or `undefined` doesn't filter the fields of entities. */
 		fields: null,
-
-		/** @type {Array?} Schema for population. [Read more](#populating). */
 		populates: null,
-
-		/** @type {Number} Default page size in `list` action. */
 		pageSize: 10,
-
-		/** @type {Number} Maximum page size in `list` action. */
 		maxPageSize: 100,
-
-		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
-
-		/** @type {Object|Function} Validator schema or a function to validate the incoming entity in `create` & 'insert' actions. */
 		entityValidator: null,
-
-		/** @type {Boolean} Whether to use dot notation or not when updating an entity. Will **not** convert Array to dot notation. Default: `false` */
 		useDotNotation: false,
 	},
 	actions: {

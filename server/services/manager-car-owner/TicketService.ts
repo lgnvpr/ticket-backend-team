@@ -99,7 +99,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 	}
 
 	@Action()
-	public async totalRevenue(ctx: Context) {
+	public async totalRevenue(ctx: Context<PropsSummary>) {
 		// return this.adapter.collection.aggregate([
 		// 	{ $match: {} },
 		// 	{
@@ -115,14 +115,28 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		// ]).toArray().then(([res])=>{
 		// 	return res.totalRevenue
 		// })
+		const propsGetChart: PropsSummary = {
+			from: new Date(moment(ctx.params.from || 0).format("YYYY-MM-DD")),
+			to: new Date(
+				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
+			),
+			interval: ctx.params.interval || "day",
+		};
 		const sql = `
 			select sum(price) from tickets
 			join trips 
 			on trips.id = tickets."tripId" 
+			where tickets."createdAt" >= :from and tickets."createdAt" <= :to
 			group by price 
 		`;
 		return this.adapter.db
-			.query(sql)
+			.query(sql, {
+				replacements: {
+					interval: propsGetChart.interval,
+					from: propsGetChart.from,
+					to: propsGetChart.to,
+				},
+			})
 			.then(([[res]]) => parseInt(res["sum"]))
 			.catch((err) => 0);
 	}

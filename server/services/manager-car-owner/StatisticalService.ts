@@ -63,7 +63,7 @@ class StatisticalService extends BaseServiceWithSequelize<Car> {
 
 		var statistic: Summary = {
 			totalCustomer: await customerControllerServer.intervalTotal(ctx,ctx.params ),
-			totalRevenue: await ctx.call(`${serviceName.ticket}.totalRevenue`),
+			totalRevenue: await ticketControllerServer.totalRevenue(ctx,ctx.params ),
 			totalTicket: await ticketControllerServer.intervalTotal(ctx,ctx.params ),
 			totalTrip: await tripControllerServer.intervalTotal(ctx,ctx.params ),
 		};

@@ -88,7 +88,7 @@ export class PostgresHelper {
 		return Promise.all([data, count]).then((res) => {
 			return {
 				page: paramsList.page || 1,
-				pageSize: paramsList.pageSize || 10,
+				pageSize: parseInt(paramsList.pageSize.toString()) || 10,
 				total: parseInt(res[1].count),
 				rows: res[0],
 				totalPages: Math.ceil(

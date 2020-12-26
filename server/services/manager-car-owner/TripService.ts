@@ -127,7 +127,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 								tripId: trip.id,
 								carId: trip?.car?.id,
 								chairCarId: saveColumn.id,
-								chairCar : saveColumn,
+								chair_car : saveColumn,
 								trip : trip
 							} as Ticket;
 						}

@@ -269,9 +269,11 @@ const CustomService: any = {
 			});
 		},
 		async _sequelizeFind(params: any) {
+			const getRelations = this.getRelationsQuery()
 			params = this.sanitizeParamsListSequelize(params);
 			var query = this.sanitizeParamsQuery(params)
 			var data = await this.adapter.model.findAll({
+				include: getRelations,
 				where: query,
 				limit: params.limit || null,
 				offset: params.offset || null,

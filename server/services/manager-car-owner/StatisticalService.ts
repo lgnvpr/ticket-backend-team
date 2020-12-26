@@ -12,10 +12,11 @@ import { serviceName } from "@Core/query/NameService";
 import config from "server/config";
 import { Paging } from "@Core/query/Paging";
 import { DateHelper } from "server/helper/DateHelper";
-import { IntervalTicketChart, Summary } from "@Core/controller.ts/Statistical";
+import { IntervalTicketChart, PropsSummary, Summary } from "@Core/controller.ts/Statistical";
 import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
 import moment from "moment";
+import { customerControllerServer, ticketControllerServer, tripControllerServer } from "server/controller-server";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -43,6 +44,7 @@ class StatisticalService extends BaseServiceWithSequelize<Car> {
 
 	@Action()
 	async IntervalRevenue(ctx: Context<any>) {
+	
 		return this.exportDataChar(
 			await ctx.call(`${serviceName.ticket}.charRevenue`, {
 				from: ctx.params.from,
@@ -54,12 +56,16 @@ class StatisticalService extends BaseServiceWithSequelize<Car> {
 	}
 
 	@Action()
-	async StatisticalSummary(ctx: Context<any>) {
+	async StatisticalSummary(ctx: Context<PropsSummary>) {
+		ctx.params.from = new Date(moment(new Date(ctx.params.from || 0)).format("YYYY-MM-DD"))
+		ctx.params.to = new Date(moment(new Date(ctx.params.to || new Date())).format("YYYY-MM-DD"));
+		ctx.params.to.setDate(ctx.params.to.getDate() +1)
+
 		var statistic: Summary = {
-			totalCustomer: await ctx.call(`${serviceName.customer}.count`),
+			totalCustomer: await customerControllerServer.intervalTotal(ctx,ctx.params ),
 			totalRevenue: await ctx.call(`${serviceName.ticket}.totalRevenue`),
-			totalTicket: await ctx.call(`${serviceName.ticket}.count`),
-			totalTrip: await ctx.call(`${serviceName.trip}.count`),
+			totalTicket: await ticketControllerServer.intervalTotal(ctx,ctx.params ),
+			totalTrip: await tripControllerServer.intervalTotal(ctx,ctx.params ),
 		};
 		return statistic;
 	}
@@ -94,7 +100,10 @@ class StatisticalService extends BaseServiceWithSequelize<Car> {
 			return this.renderChartByDate(data, getRange, minDate, maxDate);
 		}
 		//tìm theo ngày
+
 	}
+
+	san
 	private renderChartByDate(
 		data: { time: Date; value: number }[],
 		range: number,

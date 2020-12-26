@@ -29,7 +29,7 @@ const ApiService: ServiceSchema = {
 
 		cors: {
 			// Configures the Access-Control-Allow-Origin CORS header.
-			origin: "*",
+			origin: "http://localhost:3344",
 			// Configures the Access-Control-Allow-Methods CORS header.
 			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
 			// Configures the Access-Control-Allow-Headers CORS header.
@@ -83,6 +83,10 @@ const ApiService: ServiceSchema = {
 					"GET route/count": `${serviceName.route}.count`,
 					"GET ticket/count": `${serviceName.ticket}.count`,
 					"GET trip/count": `${serviceName.trip}.count`,
+
+					"POST ticket/changeChair" : `${serviceName.ticket}.changeChair`,
+					"POST ticket/createMany" : `${serviceName.ticket}.createMany`,
+					
 
 					"GET chair_car/byCar/:carId": `${serviceName.chairCar}.getByCarId`,
 					"GET chair_car/autoCreateChair": `${serviceName.chairCar}.autoCreateChair`,

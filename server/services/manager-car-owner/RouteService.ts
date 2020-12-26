@@ -26,8 +26,13 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.route,
 })
 class RouteService extends BaseServiceWithSequelize<Route> {
-	
-
+	@Action()
+	list(ctx: Context<IList>){
+		return this._sequelizeList({
+			...ctx.params,
+			searchFields : ["localStart", "localEnd"]
+		})
+	}
 }
 
 module.exports = RouteService;

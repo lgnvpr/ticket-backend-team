@@ -41,8 +41,6 @@ class StaffService extends BaseServiceWithSequelize<Staff> {
 	}
 	@Action()
 	list(ctx: Context<IList>){
-		const get = this.adapter.relations
-		console.log(get)
 		return this._sequelizeList({
 			...ctx.params,
 			searchFields : ["name", "identityCard", "address", "phoneNumber", "sex"]

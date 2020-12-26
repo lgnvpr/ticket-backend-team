@@ -96,7 +96,7 @@ const CustomService: any = {
 				if (typeof params.sort === "string") {
 					params.sort = params.sort.replace(/,/g, " ").split(" ");
 				}
-				params.sort = params.sort.map((sortItem) => {
+				params.sortSequelize = params.sort.map((sortItem) => {
 					const typeSort =
 						sortItem.substring(0, 1) === "-" ? "DESC" : "ASC";
 					const getName =
@@ -105,7 +105,7 @@ const CustomService: any = {
 							: sortItem;
 					return [getName, typeSort];
 				}) as any; // [["Name", "Desc"],["Name", "Desc"]]
-			} else params.sort = [];
+			} else params.sortSequelize = [];
 
 			if (params.searchFields && params.searchFields.length > 0) {
 				if (typeof params.searchFields === "string") {
@@ -236,7 +236,7 @@ const CustomService: any = {
 			}
 		},
 
-		async _sequelizeList(params: IList) {
+		async _sequelizeList(params: any) {
 			params = this.sanitizeParamsListSequelize(params);
 			const getRelations = this.getRelationsQuery();
 			var query = this.sanitizeParamsQuery(params)
@@ -245,7 +245,7 @@ const CustomService: any = {
 				where: query,
 				limit: params.pageSize || 10,
 				offset: (params.page - 1) * params.pageSize,
-				order: params.sort,
+				order: params.sortSequelize,
 			});
 			dataPaging.rows = dataPaging.rows?.map((item) => {
 				if (item && item?.dataValues) {
@@ -268,14 +268,16 @@ const CustomService: any = {
 				where: query,
 			});
 		},
-		async _sequelizeFind(params: IFind) {
+		async _sequelizeFind(params: any) {
+			const getRelations = this.getRelationsQuery()
 			params = this.sanitizeParamsListSequelize(params);
 			var query = this.sanitizeParamsQuery(params)
 			var data = await this.adapter.model.findAll({
+				include: getRelations,
 				where: query,
 				limit: params.limit || null,
 				offset: params.offset || null,
-				order: params.sort,
+				order: params.sortSequelize,
 			});
 
 			data = data?.map((item) => {
@@ -298,7 +300,7 @@ const CustomService: any = {
 				where: query,
 				limit: params.limit || null,
 				offset: params.offset || null,
-				order: params.sort,
+				order: params.sortSequelize,
 			});
 
 			data = data?.map((item) => {

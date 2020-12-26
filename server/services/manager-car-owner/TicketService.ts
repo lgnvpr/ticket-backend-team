@@ -21,6 +21,8 @@ import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { tripModelSequelize } from "server/model-sequelize/TripModel";
 import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
 import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
+import { object } from "joi";
+import { CreateTicket } from "@Core/controller.ts/CreateTicket";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -34,25 +36,48 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 		chairCarModelSequelize,
 		customerModelSequelize,
 	]),
-	dependencies: ["dbCustomSequelize", serviceName.customer, serviceName.chairCar, serviceName.trip],
+	dependencies: [
+		"dbCustomSequelize",
+		serviceName.customer,
+		serviceName.chairCar,
+		serviceName.trip,
+	],
 
 	collection: serviceName.ticket,
 })
 class TicketService extends BaseServiceWithSequelize<Ticket> {
 	@Action()
+	public async changeChair(ctx: Context<{data : Ticket[]}>) {
+		const tickets = ctx.params.data
+
+		var ticket1 = {...tickets[0]};
+			ticket1.chairCarId = tickets[1].chairCarId;
+			var ticket2 = {...tickets[1]};
+			ticket2.chairCarId = tickets[0].chairCarId
+		var update: Ticket[] = [];
+		if(ticket1.id) update.push(ticket1);
+		if(ticket2.id) update.push(ticket2) 
+		const check = update.map(item=>{
+			return this.createMethod(ctx, item);
+		})
+		return  Promise.all(check).then(res=> res)
+	}
+
+	@Action()
+	public async createMany(ctx: Context<{data : Ticket[]}>){
+		var data = ctx.params.data;
+		if(typeof data == "string"){
+			data = JSON.parse(data)
+		}
+		const check =await data.map( async item=>{
+			return this.createMethod(ctx,item);
+		})
+		return Promise.all(check).then(res=> res)
+	}
+
+	@Action()
 	public async create(ctx: Context<Ticket>) {
-		let params: any = ctx.params;
-		let ticket: Ticket = params;
-		if (!ticket || !ticket.customer.name || !ticket.customer.phoneNumber)
-			throw new Error("Không được để trống thông tin khách hàng");
-		let getCustomer = ticket.customer;
-		if (getCustomer)
-			getCustomer = await ctx.call(
-				`${serviceName.customer}.create`,
-				getCustomer
-			);
-		ticket.customerId = getCustomer.id.toString();
-		return this._sequelizeCreate(ticket);
+		return this.createMethod(ctx,ctx.params)
 	}
 
 	@Action()
@@ -124,8 +149,8 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
 		group by date_trunc('day', tickets."createdAt"),price 
 		`;
-		return this.adapter
-		.db.query(sql, {
+		return this.adapter.db
+			.query(sql, {
 				replacements: [
 					propsGetChart.interval,
 					propsGetChart.from,
@@ -193,6 +218,21 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 				month: { $month: "$createAt" },
 			};
 		}
+	}
+
+	public async createMethod(ctx: Context, params: Ticket) {
+		let ticket: Ticket = params;
+		if (!ticket || !ticket.customer.name || !ticket.customer.phoneNumber)
+			throw new Error("Không được để trống thông tin khách hàng");
+		let getCustomer = ticket.customer;
+		if (getCustomer)
+			getCustomer = await ctx.call(
+				`${serviceName.customer}.create`,
+				getCustomer
+			);
+		ticket.customerId = getCustomer.id.toString();
+
+		return this._sequelizeCreate(ticket);
 	}
 }
 

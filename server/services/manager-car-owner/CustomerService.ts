@@ -26,7 +26,11 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.customer,
 })
 class CustomerService extends BaseServiceWithSequelize<Customer> {
-	
+	@Action()
+	public list(ctx: Context<IList>) {
+		ctx.params.searchFields = ["CMND","email","name","phoneNumber","sex","description"];
+		return  this._sequelizeList(ctx.params)
+	}
 }
 
 module.exports = CustomerService;

@@ -18,6 +18,7 @@ import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServ
 import { ChairCarServerController } from "server/controller-server/ChairCarServerController";
 import { chairCarControllerServer } from "server/controller-server";
 import { SequelizeDbAdapterProps } from "server/base-service/sequelize/SequelizeDbAdapter";
+import { PostgresHelper } from "server/helper/PostgresHelper";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -35,22 +36,17 @@ class CarService extends BaseServiceWithSequelize<Car> {
 	
 	@Action()
 	public async list(ctx: Context<IList>) {
+		ctx.params = this.sanitizeParamsListSequelize(ctx.params)
+		ctx.params.searchFields =["name", "description", "origin", "licensePlates", "totalChair"]
+		const sql = `select * from cars
+		left join (select chair_cars."carId", count(chair_cars."carId") as "totalChair" from chair_cars
+		where chair_cars.status  = 'active'
+		group by chair_cars."carId"  ) as chair_total
+		on (cars.id = chair_total."carId")
+		where cars.status = 'active'
+		`
+		return  PostgresHelper.queryPagination(this.adapter, sql , {}, ctx.params)
 		
-		var listCar: Paging<Car> = await this._sequelizeList(ctx.params);
-		const carIds = listCar.rows.map((car) => car.id);
-		const countCharOfCar: {
-			carId: string;
-			count: number;
-		}[] = await chairCarControllerServer.countGroupByCarIds(ctx, carIds)
-
-		listCar.rows=  listCar.rows.map((car) => {
-			const getTotalChair = countCharOfCar.find(
-				(count) => count.carId == car.id
-			);
-			car.totalChair = getTotalChair?.count;
-			return car;
-		});
-		return listCar;
 	}
 }
 

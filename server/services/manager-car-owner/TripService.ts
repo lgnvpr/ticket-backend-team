@@ -8,6 +8,7 @@ import { Ticket } from "@Core/base-carOwner/Ticket";
 import { Trip } from "@Core/base-carOwner/Trip";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
+import { PropsSummary } from "@Core/controller.ts/Statistical";
 import { ListWithTripSale } from "@Core/controller.ts/TripController";
 import { Status } from "@Core/query/BaseModel";
 import { IFind } from "@Core/query/IFind";
@@ -34,6 +35,20 @@ const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.trip,
 })
 class TripService extends BaseServiceWithSequelize<Trip> {
+	@Action()
+	public intervalTotal(ctx: Context<PropsSummary>){
+		const sql = `select count(*) from trips 
+		where trips.status = 'active'
+		and trips."createdAt" >= :from and trips."createdAt" <= :to
+		`
+		return this.adapter.db.query(sql , {replacements: {
+			from : ctx.params.from,
+			to : ctx.params.to  
+		}}).then(([[res]] : any)=>{
+			return res.count
+		})
+	}
+
 	@Action()
 	async getListByDate(ctx: Context<ListWithTripSale>) {
 		console.log(ctx.params)

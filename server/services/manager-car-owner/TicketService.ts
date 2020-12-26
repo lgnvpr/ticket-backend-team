@@ -47,37 +47,55 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 })
 class TicketService extends BaseServiceWithSequelize<Ticket> {
 	@Action()
-	public async changeChair(ctx: Context<{data : Ticket[]}>) {
-		const tickets = ctx.params.data
-
-		var ticket1 = {...tickets[0]};
-			ticket1.chairCarId = tickets[1].chairCarId;
-			var ticket2 = {...tickets[1]};
-			ticket2.chairCarId = tickets[0].chairCarId
-		var update: Ticket[] = [];
-		if(ticket1.id) update.push(ticket1);
-		if(ticket2.id) update.push(ticket2) 
-		const check = update.map(item=>{
-			return this.createMethod(ctx, item);
-		})
-		return  Promise.all(check).then(res=> res)
+	public intervalTotal(ctx: Context<PropsSummary>) {
+		const sql = `select count(*) from tickets 
+		where tickets.status = 'active'
+		and tickets."createdAt" >= :from and tickets."createdAt" <= :to
+		`;
+		return this.adapter.db
+			.query(sql, {
+				replacements: {
+					from: ctx.params.from,
+					to: ctx.params.to,
+				},
+			})
+			.then(([[res]]: any) => {
+				return res.count;
+			});
 	}
 
 	@Action()
-	public async createMany(ctx: Context<{data : Ticket[]}>){
+	public async changeChair(ctx: Context<{ data: Ticket[] }>) {
+		const tickets = ctx.params.data;
+
+		var ticket1 = { ...tickets[0] };
+		ticket1.chairCarId = tickets[1].chairCarId;
+		var ticket2 = { ...tickets[1] };
+		ticket2.chairCarId = tickets[0].chairCarId;
+		var update: Ticket[] = [];
+		if (ticket1.id) update.push(ticket1);
+		if (ticket2.id) update.push(ticket2);
+		const check = update.map((item) => {
+			return this.createMethod(ctx, item);
+		});
+		return Promise.all(check).then((res) => res);
+	}
+
+	@Action()
+	public async createMany(ctx: Context<{ data: Ticket[] }>) {
 		var data = ctx.params.data;
-		if(typeof data == "string"){
-			data = JSON.parse(data)
+		if (typeof data == "string") {
+			data = JSON.parse(data);
 		}
-		const check =await data.map( async item=>{
-			return this.createMethod(ctx,item);
-		})
-		return Promise.all(check).then(res=> res)
+		const check = await data.map(async (item) => {
+			return this.createMethod(ctx, item);
+		});
+		return Promise.all(check).then((res) => res);
 	}
 
 	@Action()
 	public async create(ctx: Context<Ticket>) {
-		return this.createMethod(ctx,ctx.params)
+		return this.createMethod(ctx, ctx.params);
 	}
 
 	@Action()
@@ -130,34 +148,35 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		// 		},
 		// 	},
 		// ]).toArray();
-
+		
 		const propsGetChart: PropsSummary = {
-			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			from: new Date(moment(ctx.params.from || 0).format("YYYY-MM-DD")),
 			to: new Date(
 				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
 			),
 			interval: ctx.params.interval || "day",
 		};
-		propsGetChart.to = new Date(
-			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
-		);
+
+		propsGetChart.to.setDate(propsGetChart.to.getDate() + 1);
 
 		const sql = `
-		select date_trunc(?, tickets."createdAt") as "time",sum(price) as "value" from tickets
+		select date_trunc(:interval, tickets."createdAt") as "time",sum(price) as "value" from tickets
 		join trips 
 		on trips.id = tickets."tripId" 
-		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
-		group by date_trunc('day', tickets."createdAt"),price 
+		where tickets."createdAt" >= :from and tickets."createdAt" <= :to 
+		group by date_trunc(:interval, tickets."createdAt") 
+		order by date_trunc(:interval, tickets."createdAt") asc
 		`;
 		return this.adapter.db
 			.query(sql, {
-				replacements: [
-					propsGetChart.interval,
-					propsGetChart.from,
-					propsGetChart.to,
-				],
+				replacements: {
+					interval: propsGetChart.interval,
+					from: propsGetChart.from,
+					to: propsGetChart.to,
+				},
 			})
 			.then(([res]: any) => {
+				console.log("----------")
 				console.log(res);
 				return res;
 			});
@@ -177,28 +196,27 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		// ]);
 
 		const propsGetChart: PropsSummary = {
-			from: new Date(moment(ctx.params.from | 0).format("YYYY-MM-DD")),
+			from: new Date(moment(ctx.params.from || 0).format("YYYY-MM-DD")),
 			to: new Date(
 				moment(ctx.params.to || new Date()).format("YYYY-MM-DD")
 			),
 			interval: ctx.params.interval || "day",
 		};
-		propsGetChart.to = new Date(
-			propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
-		);
+		propsGetChart.to.setDate(propsGetChart.to.getDate() + 1)
 
 		const sql = `
-		select date_trunc(?, tickets."createdAt") as "time",count(*) as "value" from tickets
-		where tickets."createdAt" >= ? and tickets."createdAt" <= ? 
-		group by date_trunc('day', tickets."createdAt")
+		select date_trunc(:interval, tickets."createdAt") as "time",count(*) as "value" from tickets
+		where tickets."createdAt" >= :from and tickets."createdAt" <= :to 
+		group by date_trunc(:interval, tickets."createdAt")
+		order by date_trunc(:interval, tickets."createdAt") asc 
 		`;
 		return this.adapter.db
 			.query(sql, {
-				replacements: [
-					propsGetChart.interval,
-					propsGetChart.from,
-					propsGetChart.to,
-				],
+				replacements: {
+					interval :  propsGetChart.interval,
+					from :  propsGetChart.from,
+					to :  propsGetChart.to,
+				},
 			})
 			.then(([res]: any) => {
 				console.log(res);

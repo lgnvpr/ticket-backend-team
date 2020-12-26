@@ -1,5 +1,6 @@
 import { ChairCar } from "@Core/base-carOwner/ChairCar";
 import { Trip } from "@Core/base-carOwner/Trip";
+import { PropsSummary } from "@Core/controller.ts/Statistical";
 import { Context } from "moleculer";
 import { carControllerServer, routeControllerServer } from ".";
 import { BaseServiceController } from "./BasesServiceController";
@@ -26,4 +27,7 @@ export class TripServerController extends BaseServiceController<Trip>{
         })
         return data;
     }
+    async intervalTotal(ctx: Context, params: PropsSummary): Promise<number> {
+        return ctx.broker.call(`${this.serviceName}.intervalTotal`, params);
+      }
 }

@@ -24,6 +24,7 @@ import { tripModelSequelize } from "server/model-sequelize/TripModel";
 import { staffModelSequelize } from "server/model-sequelize/StaffModel";
 import { routeModelSequelize } from "server/model-sequelize/RouteModel";
 import { ticketModelSequelize } from "server/model-sequelize/TicketModel";
+import { StatusTicket } from "@Core/base-carOwner/Ticket";
 
 
 @Service({
@@ -143,7 +144,8 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 					description : "",
 					tripId : tripTicket.id,
 					customer : customerTicket,
-					createdAt : date
+					createdAt : date,
+					statusTicket : StatusTicket.payed
 				})	
 			}
 		}

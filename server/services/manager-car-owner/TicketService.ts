@@ -22,6 +22,7 @@ import { tripModelSequelize } from "server/model-sequelize/TripModel";
 import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
 import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
 import { object } from "joi";
+import { routeControllerServer } from "server/controller-server";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -45,6 +46,31 @@ const SqlAdapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.ticket,
 })
 class TicketService extends BaseServiceWithSequelize<Ticket> {
+
+	@Action()
+		public async list(ctx: Context){
+			var dataPagination = await this._sequelizeList(ctx.params)
+			const routeIds = dataPagination.rows.map(item=>{
+				return item.trip.routeId
+			})
+			console.log(routeIds)
+			const routes = await routeControllerServer._find(ctx, {
+				query : {
+					id : routeIds
+				}
+			})
+
+			dataPagination.rows = dataPagination.rows.map(item=>{
+				const trip: any= item.trip 
+				if(trip.dataValues){
+					item.trip =trip.dataValues 
+				}
+				console.log(item)
+				item.trip.route = routes.find(route=> route.id == item.trip.routeId)
+				return item
+			})
+			return dataPagination
+		}
 	@Action()
 	public intervalTotal(ctx: Context<PropsSummary>) {
 		const sql = `select count(*) from tickets 
@@ -125,7 +151,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 			select sum(price) from tickets
 			join trips 
 			on trips.id = tickets."tripId" 
-			where tickets."createdAt" >= :from and tickets."createdAt" <= :to
+			where tickets."createdAt" >= :from and tickets."createdAt" <= :to and tickets ."statusTicket"  = 'payed'
 			group by price 
 		`;
 		return this.adapter.db
@@ -142,6 +168,8 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 
 	@Action()
 	public async charRevenue(ctx: Context<any>) {
+
+		
 		// let typeGet: any = this.getType(ctx.params.type);
 		// return this.adapter.collection.aggregate([
 		// 	{ $match: {} },
@@ -176,7 +204,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 		select date_trunc(:interval, tickets."createdAt") as "time",sum(price) as "value" from tickets
 		join trips 
 		on trips.id = tickets."tripId" 
-		where tickets."createdAt" >= :from and tickets."createdAt" <= :to 
+		where tickets."createdAt" >= :from and tickets."createdAt" <= :to  and tickets ."statusTicket"  = 'payed'
 		group by date_trunc(:interval, tickets."createdAt") 
 		order by date_trunc(:interval, tickets."createdAt") asc
 		`;
@@ -219,7 +247,7 @@ class TicketService extends BaseServiceWithSequelize<Ticket> {
 
 		const sql = `
 		select date_trunc(:interval, tickets."createdAt") as "time",count(*) as "value" from tickets
-		where tickets."createdAt" >= :from and tickets."createdAt" <= :to 
+		where tickets."createdAt" >= :from and tickets."createdAt" <= :to and tickets ."statusTicket"  = 'payed'
 		group by date_trunc(:interval, tickets."createdAt")
 		order by date_trunc(:interval, tickets."createdAt") asc 
 		`;

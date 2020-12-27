@@ -29,7 +29,7 @@ const ApiService: ServiceSchema = {
 
 		cors: {
 			// Configures the Access-Control-Allow-Origin CORS header.
-			origin: "http://localhost:3344",
+			origin: "*",
 			// Configures the Access-Control-Allow-Methods CORS header.
 			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
 			// Configures the Access-Control-Allow-Headers CORS header.

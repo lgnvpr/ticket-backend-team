@@ -67,9 +67,11 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 		let params: any = ctx.params;
 
 		let carId = params.carId;
-		let floor = params.floor;
-		let row = params.row;
-		let column = params.column;
+		let floor = parseInt(params.floor.toString());
+		let row = parseInt(params.row.toString());
+		let column = parseInt(params.column.toString());
+		
+		
 		if (!floor || !row || !column) {
 			throw new Error("Vui lòng nhập đúng thông tin");
 		}
@@ -79,27 +81,33 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 			for (let rw = 1; rw <= row; rw++) {
 				for (let cl = 1; cl <= column; cl++) {
 					let getColumn = 0;
-					if (column == 1) getColumn = 3;
-					if (column == 2) getColumn = (cl - 1) * 4 + 1;
-					if (column == 3) getColumn = Math.floor(cl * 1.9);
-					column == 4 && cl >= 3
+					console.log(column);
+					console.log(cl)
+					if (column === 1) getColumn = 3;
+					else if (column === 2) getColumn = cl*2;
+					else  if (column === 3) getColumn = Math.floor(cl * 1.9);
+					else if(column === 4 ){
+						cl >= 3
 						? (getColumn = cl + 1)
 						: (getColumn = cl);
-					if (column == 5) getColumn = column;
+					}
+					if (column === 5) getColumn = cl;
 
+					console.log(getColumn)
 					let newChair = {
 						carId: carId,
-						codeChair: this.codeChair(fl, column, rw),
-
+						name: this.codeChair(fl, getColumn, rw),
 						localColumn: getColumn,
 						localRow: rw,
 						localFloor: fl,
 					};
+					console.log(newChair)
 					listChair.push(newChair);
 				}
 			}
 		}
-		
+
+		// console.log(listChair)
 		return this._sequelizeCreate(listChair as any);
 	}
 
@@ -112,6 +120,7 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 		});
 		let floor: Array<any> = [];
 		let row: Array<any> = [];
+
 		getData.map((chair: ChairCar) => {
 			floor.push(chair.localFloor);
 			row.push(chair.localRow);
@@ -128,6 +137,17 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 		row = row.filter((value, index, self) => {
 			return self.indexOf(value) === index;
 		});
+		row = row.sort((a, b )=>{
+			if(a>b) return 1 ;
+			if(a<b) return -1;
+			return 0
+		})
+
+		floor = floor.sort((a, b )=>{
+			if(a>b) return 1 ;
+			if(a<b) return -1;
+			return 0
+		})
 
 		let testData = floor.map((floor, getFloor) => {
 			let createRow = row.map((row: any) => {
@@ -158,17 +178,13 @@ class ChairCarService extends BaseServiceWithSequelize<ChairCar> {
 
 	private codeChair(fl: number, column: number, rw: number): string {
 		let getNameFloor = fl == 1 ? "L" : "D";
-		let getNameColum =
-			column == 1
-				? "A"
-				: column == 2
-				? "B"
-				: column == 3
-				? "C"
-				: column == 4
-				? "D"
-				: "E";
-		return `${getNameFloor} ${rw}${getNameColum}`;
+		let getNameColum ;
+		if(column===1) getNameColum ="A";
+		if(column===2) getNameColum ="B";
+		if(column===3) getNameColum ="C";
+		if(column===4) getNameColum ="D";
+		if(column===5) getNameColum ="E"; 
+		return `${getNameFloor}${rw}${getNameColum}`;
 	}
 }
 

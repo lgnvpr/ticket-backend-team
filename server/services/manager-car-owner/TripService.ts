@@ -8,6 +8,7 @@ import { Ticket } from "@Core/base-carOwner/Ticket";
 import { Trip } from "@Core/base-carOwner/Trip";
 import { DiagramChairOfTrip } from "@Core/controller.ts/DiagramChairOfTrip";
 import { ListChairCar } from "@Core/controller.ts/ListChairCar";
+import { PropsSummary } from "@Core/controller.ts/Statistical";
 import { ListWithTripSale } from "@Core/controller.ts/TripController";
 import { Status } from "@Core/query/BaseModel";
 import { IFind } from "@Core/query/IFind";
@@ -17,7 +18,7 @@ import { Action, Service } from "moleculer-decorators";
 import moment from "moment";
 import { Op, where } from "sequelize";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
-import { tripControllerServer } from "server/controller-server";
+import { staffControllerServer, tripControllerServer } from "server/controller-server";
 import { PostgresHelper } from "server/helper/PostgresHelper";
 import { carModelSequelize } from "server/model-sequelize/CarModel";
 import { routeModelSequelize } from "server/model-sequelize/RouteModel";
@@ -34,6 +35,36 @@ const Adapter = require("../../base-service/sequelize/SequelizeDbAdapter");
 	collection: serviceName.trip,
 })
 class TripService extends BaseServiceWithSequelize<Trip> {
+	@Action()
+	public async list(ctx: Context){
+		var data =await this._sequelizeList(ctx.params);
+		const staffIds =  data.rows.map(item=>{
+			return item.driverId
+		})
+		var drivers =await  staffControllerServer._find(ctx, {
+			query : {id : staffIds}
+		})
+		data.rows = data.rows.map(item=>{
+			item.drive = drivers.find(driver => driver.id == item.driverId);
+			return item
+		})
+		return data
+	}
+
+	@Action()
+	public intervalTotal(ctx: Context<PropsSummary>){
+		const sql = `select count(*) from trips 
+		where trips.status = 'active'
+		and trips."createdAt" >= :from and trips."createdAt" <= :to
+		`
+		return this.adapter.db.query(sql , {replacements: {
+			from : ctx.params.from,
+			to : ctx.params.to  
+		}}).then(([[res]] : any)=>{
+			return res.count
+		})
+	}
+
 	@Action()
 	async getListByDate(ctx: Context<ListWithTripSale>) {
 		console.log(ctx.params)
@@ -64,6 +95,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 			select chair_cars.id from chair_cars
 			where chair_cars."carId" = trips."carId"
 		)
+		and tickets."status" = 'active'
 		group by trips.id
 		) chair_remain
 		on chair_remain.id = trip_data.id

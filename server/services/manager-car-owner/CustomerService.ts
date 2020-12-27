@@ -13,6 +13,7 @@ import config from "server/config";
 import { IGet } from "@Core/query/IGet";
 import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
 import { BaseServiceWithSequelize } from "server/base-service/sequelize/BaseServiceWithSequelize";
+import { PropsSummary } from "@Core/controller.ts/Statistical";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");
@@ -30,6 +31,20 @@ class CustomerService extends BaseServiceWithSequelize<Customer> {
 	public list(ctx: Context<IList>) {
 		ctx.params.searchFields = ["CMND","email","name","phoneNumber","sex","description"];
 		return  this._sequelizeList(ctx.params)
+	}
+
+	@Action()
+	public intervalTotal(ctx: Context<PropsSummary>){
+		const sql = `select count(*) from customers 
+		where customers.status = 'active'
+		and customers."createdAt" >= :from and customers."createdAt" <= :to
+		`
+		return this.adapter.db.query(sql , {replacements: {
+			from : ctx.params.from,
+			to : ctx.params.to  
+		}}).then(([[res]] : any)=>{
+			return res.count
+		})
 	}
 }
 

@@ -46,7 +46,7 @@ const ApiService: ServiceSchema = {
 		},
 		routes: [
 			{
-				authentication: false,
+				authentication: true,
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
 					ctx.broker.cacher.clean();

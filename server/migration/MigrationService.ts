@@ -164,7 +164,7 @@ class TripService extends BaseServiceWithSequelize<Trip> {
 
 		await accountControllerServer._create(ctx, {
 			staffId : staffFind[Math.floor(Math.random()*((await positionFind).length-1))].id,
-			username : "quuyet@gmail.com",
+			username : "quyet@gmail.com",
 			password : "admin"
 		})
 		await accountControllerServer._create(ctx, {

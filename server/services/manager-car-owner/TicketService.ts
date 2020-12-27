@@ -22,7 +22,6 @@ import { tripModelSequelize } from "server/model-sequelize/TripModel";
 import { chairCarModelSequelize } from "server/model-sequelize/ChairCarModel";
 import { customerModelSequelize } from "server/model-sequelize/CustomerModel";
 import { object } from "joi";
-import { CreateTicket } from "@Core/controller.ts/CreateTicket";
 const MongoDBAdapter = require("moleculer-db-adapter-mongo");
 const DbService = require("moleculer-db");
 const DBServiceCustom = require("../../base-service/sequelize/DbServiceSequelize");

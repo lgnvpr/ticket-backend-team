@@ -4,7 +4,7 @@
   "description": "My Moleculer-based microservices project",
   "scripts": {
     "init": "git checkout develop;git submodule update --init; git submodule update --remote;npm i; npm run dev",
-    "pull-docker": "docker pull mongo",
+    "pull-docker": "docker run --name postgres-dev -p 5432:5432  -e POSTGRES_USER=flynotes -e POSTGRES_PASSWORD=password -e POSTGRES_DB=ticket -d postgres",
     "docker-mongo": "docker run -d -p 27017:27017 --name mongo mongo",
     "start": "ts-node -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --config moleculer.config.ts server/base-service/sequelize/DbServiceSequelize.ts server/services/*.ts server/services/*/*.ts  server/application/*.ts ",
     "migration": "ts-node -r tsconfig-paths/register ./node_modules/moleculer/bin/moleculer-runner.js --hot --config moleculer.config.ts server/base-service/sequelize/DbServiceSequelize.ts server/services/*.ts server/services/*/*.ts  server/application/*.ts server/migration/MigrationService.ts ",

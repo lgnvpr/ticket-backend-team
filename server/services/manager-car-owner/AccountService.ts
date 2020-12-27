@@ -62,15 +62,18 @@ class AccountService extends BaseServiceWithSequelize<Account> {
 				]
 			}
 		})
-		console.log(checkExit)
-		const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit?.dataValues?.staffId})
-		if(checkStaff){
-			return {
-				token : jwt.sign(checkStaff, "aleTeam"),
-				auth :checkStaff 
+		if(checkExit){
+			const  checkStaff  =await staffControllerServer._get(ctx, {id : checkExit?.dataValues?.staffId})
+			if(checkStaff){
+				return {
+					token : jwt.sign(checkStaff, "aleTeam"),
+					auth :checkStaff 
+				}
 			}
+			throw new Error("Tên tài khoản hoặc mật khẩu không đúng");
 		}
 		throw new Error("Tên tài khoản hoặc mật khẩu không đúng");
+		
 	}
 }
 
